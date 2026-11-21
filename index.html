@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wordly - Pengolah Kata Profesional</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Google Fonts Default Collection -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,700;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            word: {
+              50: '#F0F6FF',
+              100: '#E0EDFF',
+              600: '#0F6CBD',
+              700: '#185ABD',
+              800: '#104A9E',
+              900: '#0B3574',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #F3F2F1;
+      color: #242424;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Booting Splash Screen */
+    #splash-screen {
+      position: fixed;
+      inset: 0;
+      background: #0F6CBD;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: opacity 0.5s ease;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #E8E6E4;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #B3B0AD;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #8A8886;
+    }
+
+    /* Prevent toolbar buttons from stealing text selection focus */
+    .ribbon-bar button, .top-header button {
+      cursor: pointer;
+    }
+
+    /* Workspace background */
+    .paper-workspace {
+      background-color: #E8E6E4;
+      background-image: radial-gradient(#D2D0CE 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+
+    /* Interactive Paper Sheet */
+    .word-page {
+      background: #FFFFFF;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14), 0 1px 3px rgba(0, 0, 0, 0.08);
+      transition: width 0.25s ease, min-height 0.25s ease, padding 0.25s ease, background-color 0.25s ease;
+      position: relative;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+
+    .word-page.page-bordered {
+      outline: 3px double #185ABD;
+      outline-offset: -24px;
+    }
+
+    /* Watermark Overlay */
+    .page-watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      font-size: 72px;
+      font-weight: 800;
+      color: rgba(150, 150, 150, 0.18);
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+      z-index: 1;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+    }
+
+    /* Editable area content */
+    .editor-content {
+      outline: none;
+      min-height: 750px;
+      word-wrap: break-word;
+      position: relative;
+      z-index: 2;
+    }
+
+    .editor-content p {
+      margin-bottom: 0.5em;
+      line-height: 1.55;
+    }
+
+    .editor-content h1 { font-size: 2em; font-weight: 700; color: #185ABD; margin: 0.4em 0; }
+    .editor-content h2 { font-size: 1.5em; font-weight: 600; color: #0F6CBD; margin: 0.35em 0; }
+    .editor-content h3 { font-size: 1.2em; font-weight: 600; color: #323130; margin: 0.3em 0; }
+
+    .editor-content table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 12px 0;
+    }
+
+    .editor-content table td, .editor-content table th {
+      border: 1px solid #8A8886;
+      padding: 8px 12px;
+      min-width: 40px;
+      vertical-align: top;
+    }
+
+    .editor-content table.table-theme-blue th {
+      background-color: #185ABD;
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+    .editor-content table.table-theme-blue tr:nth-child(even) td {
+      background-color: #F0F6FF;
+    }
+
+    .editor-content table.table-theme-green th {
+      background-color: #0F766E;
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+    .editor-content table.table-theme-green tr:nth-child(even) td {
+      background-color: #F0FDFA;
+    }
+
+    .editor-content table.table-theme-dark th {
+      background-color: #323130;
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+    .editor-content table.table-theme-dark tr:nth-child(even) td {
+      background-color: #F3F2F1;
+    }
+
+    /* Drop Cap Style */
+    .word-drop-cap::first-letter {
+      float: left;
+      font-size: 3.4em;
+      line-height: 0.82;
+      padding-top: 4px;
+      padding-right: 10px;
+      padding-bottom: 2px;
+      font-weight: 700;
+      color: #185ABD;
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+
+    /* WordArt Style */
+    .wordart-text {
+      display: inline-block;
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #0F6CBD 0%, #2563EB 50%, #7C3AED 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 2px 3px 6px rgba(15, 108, 189, 0.25);
+      padding: 4px 2px;
+    }
+
+    .editor-content table td, .editor-content table th {
+      border: 1px solid #8A8886;
+      padding: 8px 12px;
+      min-width: 40px;
+    }
+
+    .editor-content blockquote {
+      border-left: 4px solid #106EBE;
+      margin: 10px 0;
+      color: #484644;
+      font-style: italic;
+      background-color: #F3F2F1;
+      padding: 8px 14px;
+    }
+
+    /* Multi-column layouts */
+    .cols-2 { column-count: 2; column-gap: 32px; column-rule: 1px solid #E1DFDD; }
+    .cols-3 { column-count: 3; column-gap: 24px; column-rule: 1px solid #E1DFDD; }
+
+    /* Print styles - REAL PRINT ENGINE */
+    @media print {
+      @page {
+        margin: 0;
+      }
+      html, body {
+        height: auto !important;
+        overflow: visible !important;
+        background: #FFFFFF !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .top-header, .ribbon-bar, .status-bar, .ruler-container, #nav-sidebar, .page-action-bar, .no-print {
+        display: none !important;
+      }
+      #main-layout-wrapper {
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      #workspace-scroll {
+        background: #FFFFFF !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        display: block !important;
+      }
+      #pages-container {
+        transform: none !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .word-page {
+        box-shadow: none !important;
+        margin: 0 !important;
+        width: 100% !important;
+        min-height: 100vh !important;
+        page-break-after: always;
+        break-after: page;
+        border: none !important;
+      }
+      .word-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+    }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden select-none">
+
+  <!-- BOOTING SPLASH SCREEN (MS WORD STYLE) -->
+  <div id="splash-screen">
+    <div class="w-28 h-28 bg-white rounded-3xl flex items-center justify-center shadow-2xl mb-5 p-3 animate-pulse">
+      <img src="https://cdn.phototourl.com/anon/2026-11-21-062d6fc4-a000-4653-9d8a-2485bd50420b.png" alt="Wordly" class="w-full h-full object-contain">
+    </div>
+    <h1 class="text-3xl font-extrabold tracking-wide mb-1">Wordly</h1>
+    <p id="splash-status" class="text-blue-100 text-xs mb-6 font-medium">Menyiapkan ruang kerja & mesin cetak...</p>
+    <div class="w-56 h-1.5 bg-blue-950/50 rounded-full overflow-hidden">
+      <div id="splash-progress" class="h-full bg-white rounded-full transition-all duration-300 w-0"></div>
+    </div>
+  </div>
+
+  <!-- TOP HEADER / APP BAR -->
+  <header class="top-header bg-gradient-to-r from-word-900 via-word-800 to-word-700 text-white flex items-center justify-between px-4 py-2 shadow-md z-30 shrink-0">
+    <div class="flex items-center space-x-3">
+      <!-- Official Wordly Logo -->
+      <div class="w-9 h-9 flex items-center justify-center relative cursor-pointer bg-white rounded-xl p-1 shadow-sm hover:scale-105 transition" onclick="openModal('modal-about')" title="Tentang Wordly">
+        <img src="https://cdn.phototourl.com/anon/2026-11-21-062d6fc4-a000-4653-9d8a-2485bd50420b.png" alt="Wordly" class="w-full h-full object-contain" onerror="this.onerror=null; this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
+        <svg id="logo-fallback" class="w-7 h-7 hidden" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="100" height="100" rx="22" fill="#0078D4"/>
+          <path d="M26 32 L38 70 L48 45 L58 70 L70 32" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <span class="font-bold tracking-wide text-blue-100 text-sm">Wordly</span>
+        <span class="text-blue-300">|</span>
+        <input type="text" id="document-title" value="Dokumen1" class="bg-transparent hover:bg-word-700 focus:bg-white focus:text-gray-900 px-2 py-0.5 rounded text-sm font-semibold outline-none transition text-white w-36 sm:w-48" title="Klik untuk mengubah nama dokumen">
+        <span id="save-status-badge" class="hidden sm:flex text-xs bg-word-700/80 px-2 py-0.5 rounded text-blue-100 items-center gap-1">
+          <i class="fa-solid fa-cloud-check text-xs"></i> Tersimpan
+        </span>
+      </div>
+    </div>
+
+    <!-- Quick Access Actions -->
+    <div class="flex items-center space-x-1.5">
+      <button onclick="addNewPage()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-xs font-semibold flex items-center gap-1.5 shadow-sm transition" title="Tambah Lembar Halaman Baru">
+        <i class="fa-solid fa-file-circle-plus"></i>
+        <span>+ Halaman</span>
+      </button>
+      <button onclick="deleteActivePage()" class="px-2.5 py-1 bg-red-600 hover:bg-red-500 rounded text-xs font-semibold flex items-center gap-1.5 shadow-sm transition" title="Hapus Halaman Aktif Saat Ini">
+        <i class="fa-solid fa-file-circle-minus"></i>
+        <span>- Hapus Halaman</span>
+      </button>
+      <button onclick="openModal('modal-save-as')" class="px-2.5 py-1 bg-word-700 hover:bg-word-600 border border-blue-400/30 rounded text-xs font-semibold flex items-center gap-1.5 text-white transition" title="Simpan Dokumen (Ctrl+S)">
+        <i class="fa-solid fa-floppy-disk"></i>
+        <span class="hidden sm:inline">Simpan</span>
+      </button>
+      <button onclick="execCmd('undo')" class="p-1.5 hover:bg-word-700 rounded text-white transition" title="Urungkan (Ctrl+Z)">
+        <i class="fa-solid fa-rotate-left"></i>
+      </button>
+      <button onclick="execCmd('redo')" class="p-1.5 hover:bg-word-700 rounded text-white transition" title="Ulangi (Ctrl+Y)">
+        <i class="fa-solid fa-rotate-right"></i>
+      </button>
+      <div class="h-4 w-px bg-word-600 mx-1"></div>
+      <button onclick="triggerRealPrint()" class="px-3 py-1 bg-white text-word-800 hover:bg-blue-50 rounded text-xs font-bold flex items-center gap-1.5 shadow-sm transition" title="Cetak Dokumen Asli (Ctrl+P)">
+        <i class="fa-solid fa-print"></i>
+        <span>Print Asli</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- RIBBON TABS NAV -->
+  <nav class="ribbon-bar bg-gray-100 border-b border-gray-300 px-3 pt-1 flex items-center justify-between text-sm font-medium shrink-0">
+    <div class="flex items-center space-x-1 overflow-x-auto">
+      <button onclick="switchTab('file')" id="tab-btn-file" class="ribbon-tab text-gray-700 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">File</button>
+      <button onclick="switchTab('home')" id="tab-btn-home" class="ribbon-tab font-semibold text-word-800 border-b-2 border-word-800 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">Beranda</button>
+      <button onclick="switchTab('insert')" id="tab-btn-insert" class="ribbon-tab text-gray-700 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">Sisipkan</button>
+      <button onclick="switchTab('design')" id="tab-btn-design" class="ribbon-tab text-gray-700 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">Desain</button>
+      <button onclick="switchTab('layout')" id="tab-btn-layout" class="ribbon-tab text-gray-700 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">Tata Letak</button>
+      <button onclick="switchTab('references')" id="tab-btn-references" class="ribbon-tab text-gray-700 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">Referensi</button>
+      <button onclick="switchTab('view')" id="tab-btn-view" class="ribbon-tab text-gray-700 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">Tampilan</button>
+    </div>
+    
+    <!-- Contextual Table Tools -->
+    <div id="contextual-table-tools" class="hidden flex items-center space-x-1 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-t text-xs text-amber-950 shadow-xs">
+      <span class="font-bold mr-1 flex items-center gap-1"><i class="fa-solid fa-table text-amber-700"></i> Alat Tabel:</span>
+      <button onmousedown="event.preventDefault()" onclick="tableAddRow()" class="px-1.5 py-0.5 bg-white hover:bg-amber-50 rounded border border-amber-300 font-medium">+ Baris</button>
+      <button onmousedown="event.preventDefault()" onclick="tableAddCol()" class="px-1.5 py-0.5 bg-white hover:bg-amber-50 rounded border border-amber-300 font-medium">+ Kolom</button>
+      <button onmousedown="event.preventDefault()" onclick="tableDeleteRow()" class="px-1.5 py-0.5 bg-white hover:bg-red-50 text-red-700 rounded border border-amber-300 font-medium">- Baris</button>
+      <button onmousedown="event.preventDefault()" onclick="tableDeleteCol()" class="px-1.5 py-0.5 bg-white hover:bg-red-50 text-red-700 rounded border border-amber-300 font-medium">- Kolom</button>
+      <label class="px-1.5 py-0.5 bg-white hover:bg-amber-50 rounded border border-amber-300 cursor-pointer flex items-center gap-1" title="Warna Latar Sel Tabel">
+        <span>Warna Sel</span>
+        <input type="color" value="#FEF08A" onchange="tableSetCellBg(this.value)" class="w-3.5 h-3.5 border-0 p-0 bg-transparent cursor-pointer">
+      </label>
+      <button onmousedown="event.preventDefault()" onclick="tableDeleteEntire()" class="px-1.5 py-0.5 bg-red-600 hover:bg-red-700 text-white rounded font-medium" title="Hapus Seluruh Tabel"><i class="fa-solid fa-trash"></i></button>
+    </div>
+  </nav>
+
+  <!-- RIBBON TOOLBAR CONTAINERS -->
+  <div class="ribbon-bar bg-white border-b border-gray-300 px-4 py-2 shadow-sm text-xs select-none shrink-0">
+    
+    <!-- FILE TAB CONTENT -->
+    <div id="tab-content-file" class="ribbon-content hidden flex flex-wrap items-center gap-4">
+      <div class="flex items-center space-x-2 border-r border-gray-200 pr-4">
+        <button onclick="createNewDoc()" class="flex flex-col items-center justify-center p-2 hover:bg-gray-100 rounded text-gray-700">
+          <i class="fa-solid fa-file-circle-plus text-xl text-word-700 mb-1"></i>
+          <span>Dokumen Baru</span>
+        </button>
+        <label class="flex flex-col items-center justify-center p-2 hover:bg-gray-100 rounded text-gray-700 cursor-pointer">
+          <i class="fa-solid fa-folder-open text-xl text-amber-600 mb-1"></i>
+          <span>Buka File</span>
+          <input type="file" id="file-input" accept=".txt,.html,.md,.doc" class="hidden" onchange="openFile(event)">
+        </label>
+        <button onclick="openModal('modal-save-as')" class="flex flex-col items-center justify-center p-2 hover:bg-blue-50 rounded text-word-800 font-semibold">
+          <i class="fa-solid fa-floppy-disk text-xl text-word-700 mb-1"></i>
+          <span>Simpan Sebagai...</span>
+        </button>
+        <button onclick="triggerRealPrint()" class="flex flex-col items-center justify-center p-2 hover:bg-blue-50 rounded text-word-800 font-semibold">
+          <i class="fa-solid fa-print text-xl text-word-800 mb-1"></i>
+          <span>Print Asli</span>
+        </button>
+      </div>
+
+      <!-- Document Templates -->
+      <div class="flex flex-col space-y-1 border-r border-gray-200 pr-4">
+        <span class="text-[10px] font-bold text-gray-400 uppercase">Template Siap Pakai</span>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button onclick="loadTemplate('surat')" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-word-800 rounded border border-blue-200 font-medium">
+            <i class="fa-solid fa-envelope-open-text mr-1"></i> Surat Resmi
+          </button>
+          <button onclick="loadTemplate('cv')" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded border border-emerald-200 font-medium">
+            <i class="fa-solid fa-id-card mr-1"></i> CV / Resume
+          </button>
+          <button onclick="loadTemplate('makalah')" class="px-2.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-800 rounded border border-purple-200 font-medium">
+            <i class="fa-solid fa-book mr-1"></i> Laporan / Makalah
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2 border-r border-gray-200 pr-4">
+        <button onclick="exportDoc('word')" class="flex flex-col items-center justify-center p-2 hover:bg-gray-100 rounded text-gray-700">
+          <i class="fa-solid fa-file-word text-xl text-word-800 mb-1"></i>
+          <span>Unduh .DOC</span>
+        </button>
+        <button onclick="exportDoc('html')" class="flex flex-col items-center justify-center p-2 hover:bg-gray-100 rounded text-gray-700">
+          <i class="fa-solid fa-code text-xl text-emerald-600 mb-1"></i>
+          <span>Unduh .HTML</span>
+        </button>
+        <button onclick="exportDoc('txt')" class="flex flex-col items-center justify-center p-2 hover:bg-gray-100 rounded text-gray-700">
+          <i class="fa-solid fa-file-lines text-xl text-gray-600 mb-1"></i>
+          <span>Unduh .TXT</span>
+        </button>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <button onclick="clearLocalStorage()" class="flex flex-col items-center justify-center p-2 hover:bg-red-50 rounded text-red-600">
+          <i class="fa-solid fa-trash-can text-xl mb-1"></i>
+          <span>Reset Semua</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- HOME TAB CONTENT (Default Active) -->
+    <div id="tab-content-home" class="ribbon-content flex flex-wrap items-center gap-3">
+      
+      <!-- Clipboard & Format Painter -->
+      <div class="flex items-center space-x-1 border-r border-gray-200 pr-3">
+        <button onclick="triggerPaste()" class="flex flex-col items-center p-1.5 hover:bg-gray-100 rounded" title="Tempel Teks">
+          <i class="fa-solid fa-clipboard text-lg text-word-700"></i>
+          <span class="text-[10px] mt-0.5">Tempel</span>
+        </button>
+        <div class="flex flex-col space-y-0.5">
+          <button onclick="execCmd('copy')" class="px-2 py-0.5 hover:bg-gray-100 rounded text-left flex items-center gap-1.5">
+            <i class="fa-regular fa-copy text-gray-600"></i> Salin
+          </button>
+          <button onclick="execCmd('cut')" class="px-2 py-0.5 hover:bg-gray-100 rounded text-left flex items-center gap-1.5">
+            <i class="fa-solid fa-scissors text-gray-600"></i> Potong
+          </button>
+          <button id="btn-format-painter" onclick="toggleFormatPainter()" class="px-2 py-0.5 hover:bg-amber-100 rounded text-left flex items-center gap-1.5 text-amber-700 font-medium" title="Salin gaya format ke teks lain">
+            <i class="fa-solid fa-paintbrush"></i> Kuas Format
+          </button>
+        </div>
+        <button onclick="execCmd('removeFormat')" class="p-2 hover:bg-gray-100 rounded text-gray-700" title="Hapus Format Teks">
+          <i class="fa-solid fa-text-slash"></i>
+        </button>
+      </div>
+
+      <!-- Font Family & Size & Import Font -->
+      <div class="flex flex-col space-y-1.5 border-r border-gray-200 pr-3">
+        <div class="flex items-center space-x-1">
+          <select id="font-family-select" onchange="execCmd('fontName', this.value)" class="border border-gray-300 rounded px-2 py-1 text-xs w-36 bg-white focus:border-word-600 outline-none">
+            <option value="Inter">Inter (Default)</option>
+            <option value="Arial">Arial</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Lora">Lora</option>
+            <option value="Merriweather">Merriweather</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Playfair Display">Playfair Display</option>
+            <option value="Roboto Mono">Roboto Mono</option>
+            <option value="Courier New">Courier New</option>
+          </select>
+
+          <select id="font-size-select" onchange="execCmd('fontSize', this.value)" class="border border-gray-300 rounded px-1.5 py-1 text-xs w-16 bg-white focus:border-word-600 outline-none">
+            <option value="1">8 pt</option>
+            <option value="2">10 pt</option>
+            <option value="3" selected>12 pt</option>
+            <option value="4">14 pt</option>
+            <option value="5">18 pt</option>
+            <option value="6">24 pt</option>
+            <option value="7">36 pt</option>
+          </select>
+
+          <!-- IMPORT CUSTOM FONT BUTTON -->
+          <button onclick="openModal('modal-import-font')" class="px-2 py-1 bg-word-50 hover:bg-word-100 text-word-800 border border-word-600/30 rounded font-semibold flex items-center gap-1" title="Impor Font Lokal (.ttf, .otf, .woff) atau Google Fonts">
+            <i class="fa-solid fa-font"></i> + Font
+          </button>
+        </div>
+
+        <!-- Text Style Buttons -->
+        <div class="flex items-center space-x-1">
+          <button onmousedown="event.preventDefault()" onclick="execCmd('bold')" class="w-7 h-7 hover:bg-gray-100 rounded font-bold text-gray-800" title="Tebal (Ctrl+B)">B</button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('italic')" class="w-7 h-7 hover:bg-gray-100 rounded italic font-serif text-gray-800" title="Miring (Ctrl+I)">I</button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('underline')" class="w-7 h-7 hover:bg-gray-100 rounded underline text-gray-800" title="Garis Bawah (Ctrl+U)">U</button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('strikeThrough')" class="w-7 h-7 hover:bg-gray-100 rounded line-through text-gray-800" title="Coret">S</button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('subscript')" class="w-7 h-7 hover:bg-gray-100 rounded text-gray-800" title="Subskrip">X<sub>2</sub></button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('superscript')" class="w-7 h-7 hover:bg-gray-100 rounded text-gray-800" title="Superskrip">X<sup>2</sup></button>
+          
+          <div class="h-4 w-px bg-gray-300 mx-1"></div>
+          
+          <!-- Text Color & Highlight -->
+          <label onmousedown="saveSelection()" class="flex items-center px-1.5 py-0.5 hover:bg-gray-100 rounded cursor-pointer" title="Warna Teks">
+            <span class="font-bold text-red-600 underline mr-1">A</span>
+            <input type="color" value="#185ABD" onchange="applyColorCmd('foreColor', this.value)" class="w-4 h-4 border-0 p-0 bg-transparent cursor-pointer">
+          </label>
+          <label onmousedown="saveSelection()" class="flex items-center px-1.5 py-0.5 hover:bg-gray-100 rounded cursor-pointer" title="Warna Stabilo / Sorotan">
+            <i class="fa-solid fa-highlighter text-amber-500 mr-1"></i>
+            <input type="color" value="#FEF08A" onchange="applyColorCmd('hiliteColor', this.value)" class="w-4 h-4 border-0 p-0 bg-transparent cursor-pointer">
+          </label>
+          <button onmousedown="event.preventDefault()" onclick="changeTextCase()" class="px-2 py-1 hover:bg-gray-100 rounded text-gray-700 font-medium" title="Ubah Huruf Besar/Kecil">Aa</button>
+        </div>
+      </div>
+
+      <!-- Paragraph & Alignment Group -->
+      <div class="flex flex-col space-y-1.5 border-r border-gray-200 pr-3">
+        <div class="flex items-center space-x-1">
+          <button onmousedown="event.preventDefault()" onclick="execCmd('insertUnorderedList')" class="w-7 h-7 hover:bg-gray-100 rounded text-gray-700" title="Daftar Poin"><i class="fa-solid fa-list-ul"></i></button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('insertOrderedList')" class="w-7 h-7 hover:bg-gray-100 rounded text-gray-700" title="Daftar Bernomor"><i class="fa-solid fa-list-ol"></i></button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('outdent')" class="w-7 h-7 hover:bg-gray-100 rounded text-gray-700" title="Kurangi Indentasi"><i class="fa-solid fa-outdent"></i></button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('indent')" class="w-7 h-7 hover:bg-gray-100 rounded text-gray-700" title="Tambah Indentasi"><i class="fa-solid fa-indent"></i></button>
+          <select onchange="changeLineSpacing(this.value)" class="border border-gray-300 rounded px-1 py-0.5 text-[11px] bg-white outline-none" title="Spasi Baris">
+            <option value="1.15">Spasi 1.15</option>
+            <option value="1.0">Spasi 1.0</option>
+            <option value="1.5" selected>Spasi 1.5</option>
+            <option value="2.0">Spasi 2.0</option>
+          </select>
+        </div>
+        <div class="flex items-center space-x-1">
+          <button onmousedown="event.preventDefault()" onclick="execCmd('justifyLeft')" class="w-7 h-7 hover:bg-gray-100 rounded text-gray-700" title="Rata Kiri"><i class="fa-solid fa-align-left"></i></button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('justifyCenter')" class="w-7 h-7 hover:bg-gray-100 rounded text-gray-700" title="Rata Tengah"><i class="fa-solid fa-align-center"></i></button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('justifyRight')" class="w-7 h-7 hover:bg-gray-100 rounded text-gray-700" title="Rata Kanan"><i class="fa-solid fa-align-right"></i></button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('justifyFull')" class="w-7 h-7 hover:bg-gray-100 rounded text-gray-700" title="Rata Kanan-Kiri"><i class="fa-solid fa-align-justify"></i></button>
+        </div>
+      </div>
+
+      <!-- Styles & Editing Group -->
+      <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-1 border-r border-gray-200 pr-3">
+          <button onmousedown="event.preventDefault()" onclick="execCmd('formatBlock', 'P')" class="px-2.5 py-1.5 border border-gray-200 hover:border-word-600 rounded bg-gray-50 text-gray-800">Normal</button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('formatBlock', 'H1')" class="px-2.5 py-1.5 border border-gray-200 hover:border-word-600 rounded bg-gray-50 font-bold text-word-800">Judul 1</button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('formatBlock', 'H2')" class="px-2.5 py-1.5 border border-gray-200 hover:border-word-600 rounded bg-gray-50 font-semibold text-word-600">Judul 2</button>
+          <button onmousedown="event.preventDefault()" onclick="execCmd('formatBlock', 'BLOCKQUOTE')" class="px-2.5 py-1.5 border border-gray-200 hover:border-word-600 rounded bg-gray-50 italic text-gray-600">Kutipan</button>
+        </div>
+
+        <button onclick="openModal('modal-find-replace')" class="flex flex-col items-center p-1.5 hover:bg-gray-100 rounded text-gray-700" title="Cari & Ganti Teks (Ctrl+F)">
+          <i class="fa-solid fa-magnifying-glass text-base text-word-700"></i>
+          <span class="text-[10px] mt-0.5">Cari & Ganti</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- INSERT TAB CONTENT -->
+    <div id="tab-content-insert" class="ribbon-content hidden flex flex-wrap items-center gap-2.5">
+      <button onclick="addNewPage()" class="flex flex-col items-center p-2 bg-emerald-50 hover:bg-emerald-100 rounded text-emerald-800 border border-emerald-200 font-semibold">
+        <i class="fa-solid fa-file-circle-plus text-xl text-emerald-600 mb-1"></i>
+        <span>Tambah Halaman</span>
+      </button>
+
+      <button onclick="insertPageBreak()" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-solid fa-scissors text-xl text-purple-600 mb-1"></i>
+        <span>Pemisah Halaman</span>
+      </button>
+
+      <div class="h-8 w-px bg-gray-200"></div>
+
+      <button onclick="openModal('modal-table')" class="flex flex-col items-center p-2 hover:bg-blue-50 rounded text-word-800 font-semibold">
+        <i class="fa-solid fa-table text-xl text-word-700 mb-1"></i>
+        <span>Tabel</span>
+      </button>
+
+      <label class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700 cursor-pointer">
+        <i class="fa-regular fa-image text-xl text-emerald-600 mb-1"></i>
+        <span>Gambar Lokal</span>
+        <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="insertImage(event)">
+      </label>
+
+      <button onclick="openModal('modal-image-url')" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-solid fa-globe text-xl text-sky-600 mb-1"></i>
+        <span>Gambar URL</span>
+      </button>
+
+      <button onclick="openModal('modal-shapes')" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-solid fa-shapes text-xl text-orange-600 mb-1"></i>
+        <span>Bentuk (Shapes)</span>
+      </button>
+
+      <div class="h-8 w-px bg-gray-200"></div>
+
+      <button onclick="openModal('modal-wordart')" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-solid fa-wand-magic-sparkles text-xl text-indigo-600 mb-1"></i>
+        <span>WordArt</span>
+      </button>
+
+      <button onclick="toggleDropCap()" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-solid fa-font text-xl text-rose-600 mb-1"></i>
+        <span>Drop Cap</span>
+      </button>
+
+      <button onclick="openModal('modal-link')" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-solid fa-link text-xl text-blue-600 mb-1"></i>
+        <span>Tautan Link</span>
+      </button>
+
+      <button onclick="execCmd('insertHorizontalRule')" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-solid fa-minus text-xl text-gray-600 mb-1"></i>
+        <span>Garis</span>
+      </button>
+
+      <button onclick="insertDateTime()" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-regular fa-calendar-days text-xl text-amber-600 mb-1"></i>
+        <span>Tanggal</span>
+      </button>
+
+      <button onclick="insertChecklist()" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-solid fa-list-check text-xl text-teal-600 mb-1"></i>
+        <span>Centang</span>
+      </button>
+
+      <button onclick="openModal('modal-symbols')" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-solid fa-icons text-xl text-indigo-600 mb-1"></i>
+        <span>Simbol</span>
+      </button>
+
+      <button onclick="insertCalloutBox()" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-regular fa-comment-dots text-xl text-cyan-600 mb-1"></i>
+        <span>Kotak Teks</span>
+      </button>
+    </div>
+
+    <!-- DESIGN TAB CONTENT -->
+    <div id="tab-content-design" class="ribbon-content hidden flex flex-wrap items-center gap-6">
+      <div class="flex flex-col space-y-1 border-r border-gray-200 pr-5">
+        <span class="font-semibold text-gray-500 text-[10px] uppercase tracking-wider">Watermark Halaman</span>
+        <div class="flex items-center space-x-2">
+          <select id="watermark-select" onchange="handleWatermarkSelect(this.value)" class="border border-gray-300 rounded px-2 py-1 bg-white outline-none">
+            <option value="">Tanpa Watermark</option>
+            <option value="RAHASIA">RAHASIA</option>
+            <option value="DRAFT">DRAFT</option>
+            <option value="SALINAN">SALINAN</option>
+            <option value="DOKUMEN ASLI">DOKUMEN ASLI</option>
+            <option value="CUSTOM">Teks Kustom...</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex flex-col space-y-1 border-r border-gray-200 pr-5">
+        <span class="font-semibold text-gray-500 text-[10px] uppercase tracking-wider">Warna Kertas</span>
+        <div class="flex items-center space-x-2">
+          <input type="color" id="page-bg-color" value="#FFFFFF" onchange="changePageBgColor(this.value)" class="w-7 h-7 rounded border border-gray-300 cursor-pointer">
+          <button onclick="changePageBgColor('#FFFDF5')" class="px-2 py-1 bg-[#FFFDF5] border border-gray-300 rounded text-[11px]">Krem</button>
+          <button onclick="changePageBgColor('#FFFFFF')" class="px-2 py-1 bg-white border border-gray-300 rounded text-[11px]">Putih</button>
+        </div>
+      </div>
+
+      <div class="flex flex-col space-y-1">
+        <span class="font-semibold text-gray-500 text-[10px] uppercase tracking-wider">Batas Halaman (Border)</span>
+        <label class="flex items-center space-x-2 cursor-pointer py-1">
+          <input type="checkbox" id="toggle-page-border" onchange="togglePageBorder(this.checked)" class="rounded text-word-600 w-4 h-4">
+          <span class="font-medium text-gray-700">Bingkai Ganda Klasik</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- LAYOUT TAB CONTENT -->
+    <div id="tab-content-layout" class="ribbon-content hidden flex flex-wrap items-center gap-6">
+      <div class="flex flex-col space-y-1">
+        <span class="font-semibold text-gray-500 text-[10px] uppercase tracking-wider">Ukuran Kertas</span>
+        <select id="paper-size-select" onchange="changePageLayout()" class="border border-gray-300 rounded px-2 py-1 bg-white outline-none">
+          <option value="a4" selected>A4 (210 x 297 mm)</option>
+          <option value="letter">Letter (8.5 x 11 in)</option>
+          <option value="legal">Legal (8.5 x 14 in)</option>
+          <option value="f4">F4 / Folio (215 x 330 mm)</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col space-y-1">
+        <span class="font-semibold text-gray-500 text-[10px] uppercase tracking-wider">Orientasi</span>
+        <select id="paper-orientation-select" onchange="changePageLayout()" class="border border-gray-300 rounded px-2 py-1 bg-white outline-none">
+          <option value="portrait" selected>Potret (Tegak)</option>
+          <option value="landscape">Lansekap (Mendatar)</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col space-y-1">
+        <span class="font-semibold text-gray-500 text-[10px] uppercase tracking-wider">Margin Kertas</span>
+        <select id="paper-margin-select" onchange="changePageLayout()" class="border border-gray-300 rounded px-2 py-1 bg-white outline-none">
+          <option value="normal" selected>Normal (2.54 cm)</option>
+          <option value="narrow">Sempit / Narrow (1.27 cm)</option>
+          <option value="moderate">Sedang / Moderate (1.9 cm)</option>
+          <option value="wide">Lebar / Wide (5.0 cm)</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col space-y-1">
+        <span class="font-semibold text-gray-500 text-[10px] uppercase tracking-wider">Kolom Teks</span>
+        <select id="paper-columns-select" onchange="changeColumns(this.value)" class="border border-gray-300 rounded px-2 py-1 bg-white outline-none">
+          <option value="1" selected>Satu Kolom</option>
+          <option value="2">Dua Kolom</option>
+          <option value="3">Tiga Kolom</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- REFERENCES TAB CONTENT -->
+    <div id="tab-content-references" class="ribbon-content hidden flex flex-wrap items-center gap-4">
+      <button onclick="insertAutoTOC()" class="flex flex-col items-center p-2 hover:bg-blue-50 rounded text-word-800 font-semibold">
+        <i class="fa-solid fa-list-tree text-xl text-word-700 mb-1"></i>
+        <span>Daftar Isi Otomatis</span>
+      </button>
+      <div class="h-8 w-px bg-gray-200"></div>
+      <button onclick="insertFootnote()" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-solid fa-superscript text-xl text-indigo-600 mb-1"></i>
+        <span>Sisipkan Catatan Kaki</span>
+      </button>
+      <button onclick="insertCitation()" class="flex flex-col items-center p-2 hover:bg-gray-100 rounded text-gray-700">
+        <i class="fa-solid fa-quote-right text-xl text-emerald-600 mb-1"></i>
+        <span>Sisipkan Kutipan APA</span>
+      </button>
+    </div>
+
+    <!-- VIEW TAB CONTENT -->
+    <div id="tab-content-view" class="ribbon-content hidden flex flex-wrap items-center gap-6">
+      <label class="flex items-center space-x-2 cursor-pointer">
+        <input type="checkbox" id="toggle-nav-pane" checked onchange="toggleNavSidebar(this.checked)" class="rounded text-word-600 focus:ring-word-600 w-4 h-4">
+        <span class="font-medium text-gray-700">Panel Navigasi & Halaman</span>
+      </label>
+
+      <div class="h-6 w-px bg-gray-200"></div>
+
+      <label class="flex items-center space-x-2 cursor-pointer">
+        <input type="checkbox" id="toggle-ruler" checked onchange="toggleRuler(this.checked)" class="rounded text-word-600 focus:ring-word-600 w-4 h-4">
+        <span class="font-medium text-gray-700">Penggaris (Ruler)</span>
+      </label>
+
+      <div class="h-6 w-px bg-gray-200"></div>
+
+      <button onclick="toggleFocusMode()" class="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">
+        <i class="fa-solid fa-expand text-word-700"></i>
+        <span>Mode Layar Penuh</span>
+      </button>
+
+      <button onclick="showWordCountModal()" class="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">
+        <i class="fa-solid fa-calculator text-emerald-600"></i>
+        <span>Statistik Kata</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- MAIN CONTENT AREA (SIDEBAR + EDITOR WORKSPACE) -->
+  <div id="main-layout-wrapper" class="flex-1 flex overflow-hidden">
+    
+    <!-- LEFT NAVIGATION SIDEBAR -->
+    <aside id="nav-sidebar" class="w-60 bg-white border-r border-gray-300 flex flex-col select-none shrink-0">
+      <div class="px-3 py-2.5 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+        <span class="text-xs font-bold text-gray-700 uppercase tracking-wider">Navigasi Dokumen</span>
+        <button onclick="toggleNavSidebar(false)" class="w-6 h-6 flex items-center justify-center rounded hover:bg-red-100 text-gray-500 hover:text-red-600 transition" title="Tutup Panel Navigasi"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      
+      <div class="flex border-b border-gray-200 text-xs font-medium">
+        <button onclick="switchSidebarTab('pages')" id="side-tab-pages" class="flex-1 py-2 text-word-800 border-b-2 border-word-800 bg-blue-50/40">Halaman</button>
+        <button onclick="switchSidebarTab('headings')" id="side-tab-headings" class="flex-1 py-2 text-gray-600 hover:bg-gray-50">Daftar Judul</button>
+      </div>
+
+      <div id="sidebar-pages-list" class="p-3 overflow-y-auto flex-1 space-y-2"></div>
+
+      <div id="sidebar-headings-list" class="p-3 overflow-y-auto flex-1 space-y-1.5 hidden text-xs">
+      <div class="p-2.5 border-t border-gray-200 bg-gray-50 space-y-1.5">
+        <button onclick="addNewPage()" class="w-full py-1.5 bg-word-700 hover:bg-word-800 text-white rounded text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-plus"></i> Tambah Halaman Baru
+        </button>
+        <button onclick="deleteActivePage()" class="w-full py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+          <i class="fa-solid fa-trash-can"></i> Hapus Halaman Aktif
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN EDITOR WORKSPACE -->
+    <main id="workspace-scroll" class="paper-workspace flex-1 overflow-auto flex flex-col items-center py-6 px-4 relative">
+      
+      <!-- HORIZONTAL RULER BAR -->
+      <div id="ruler-container" class="ruler-container bg-white border border-gray-300 rounded-t shadow-sm h-6 mb-3 flex items-center px-8 relative overflow-hidden select-none transition-all duration-300 shrink-0" style="width: 794px;">
+        <div class="w-full h-full flex justify-between items-end text-[9px] text-gray-500 font-mono pb-0.5">
+          <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span>
+        </div>
+      </div>
+
+      <!-- MULTI-PAGE CONTAINER -->
+      <div id="pages-container" class="flex flex-col items-center transition-transform duration-200" style="transform-origin: top center;">
+        
+        <!-- PAGE 1 -->
+        <div class="word-page rounded-sm flex flex-col" data-page-number="1" style="width: 794px; min-height: 1123px; padding: 96px;">
+          
+          <!-- Watermark Layer -->
+          <div class="page-watermark hidden"></div>
+
+          <!-- Header Area -->
+          <div class="page-header text-xs text-gray-400 pb-3 border-b border-gray-100 mb-5 flex justify-between items-center outline-none" contenteditable="true">
+            <span>Header Dokumen Wordly</span>
+            <span>Dokumen Resmi</span>
+          </div>
+
+          <!-- Editable Main Document Area -->
+          <div class="editor-content flex-1 text-gray-900 leading-relaxed font-sans" contenteditable="true" spellcheck="false">
+            <h1 style="text-align: center;">Selamat Datang di Wordly</h1>
+            <p style="text-align: center; color: #605E5C;">Aplikasi pengolah kata modern dengan dukungan banyak halaman, tabel profesional, impor font kustom, dan cetak dokumen asli.</p>
+            <hr>
+            <h2>Fitur Lengkap Siap Pakai</h2>
+            <p>Mulai mengetik dokumen Anda di sini. Gunakan pita peralatan di atas untuk mengatur format huruf, menyisipkan tabel bertema, menambahkan halaman baru, atau menyimpan dokumen dalam berbagai format.</p>
+          </div>
+
+          <!-- Footer Area -->
+          <div class="page-footer text-xs text-gray-400 pt-3 border-t border-gray-100 mt-5 flex justify-between items-center outline-none" contenteditable="true">
+            <span>Diolah dengan Wordly</span>
+            <span class="page-num-label">Halaman 1</span>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- BOTTOM STATUS BAR -->
+  <footer class="status-bar bg-word-800 text-white px-4 py-1 text-xs flex items-center justify-between select-none z-20 shrink-0">
+    <div class="flex items-center space-x-4">
+      <button onclick="showWordCountModal()" class="hover:bg-word-700 px-2 py-0.5 rounded flex items-center gap-1.5 transition" title="Klik untuk melihat statistik lengkap">
+        <i class="fa-solid fa-file-lines"></i>
+        <span>Halaman <strong id="stat-active-page">1</strong> dari <strong id="stat-page-count">1</strong></span>
+      </button>
+      <span class="text-blue-300">|</span>
+      <button onclick="showWordCountModal()" class="hover:bg-word-700 px-2 py-0.5 rounded transition">
+        <strong id="stat-word-count">0</strong> Kata
+      </button>
+      <span class="hidden sm:inline text-blue-200"><strong id="stat-char-count">0</strong> Karakter</span>
+      <span class="hidden md:inline text-blue-200 flex items-center gap-1"><i class="fa-solid fa-spell-check"></i> Bahasa Indonesia</span>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <button onclick="adjustZoom(-10)" class="w-6 h-6 hover:bg-word-700 rounded flex items-center justify-center" title="Perkecil"><i class="fa-solid fa-minus text-[10px]"></i></button>
+      <input type="range" id="zoom-slider" min="50" max="160" value="100" oninput="setZoom(this.value)" class="w-24 accent-white cursor-pointer">
+      <button onclick="adjustZoom(10)" class="w-6 h-6 hover:bg-word-700 rounded flex items-center justify-center" title="Perbesar"><i class="fa-solid fa-plus text-[10px]"></i></button>
+      <span id="zoom-display" class="w-10 text-right font-mono font-semibold">100%</span>
+    </div>
+  </footer>
+
+  <!-- MODAL: IMPORT CUSTOM FONT -->
+  <div id="modal-import-font" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-96 border border-gray-300 overflow-hidden">
+      <div class="bg-word-800 text-white px-4 py-2.5 flex justify-between items-center">
+        <h3 class="font-semibold text-sm flex items-center gap-2"><i class="fa-solid fa-font"></i> Impor Font Kustom</h3>
+        <button onclick="closeModal('modal-import-font')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 space-y-4 text-xs">
+        <div class="border-b border-gray-200 pb-3">
+          <label class="block font-bold text-gray-800 mb-1">1. Unggah File Font Lokal (.ttf, .otf, .woff, .woff2):</label>
+          <input type="file" id="custom-font-file" accept=".ttf,.otf,.woff,.woff2" class="w-full border border-gray-300 rounded p-1.5 text-xs mb-2">
+          <button onclick="importLocalFontFile()" class="w-full py-2 bg-word-700 hover:bg-word-800 text-white font-semibold rounded">
+            Pasang Font dari Perangkat
+          </button>
+        </div>
+        <div>
+          <label class="block font-bold text-gray-800 mb-1">2. Impor dari Google Fonts (Ketik Nama Font):</label>
+          <div class="flex gap-2">
+            <input type="text" id="google-font-name" placeholder="Contoh: Poppins, Lobster, Oswald" class="flex-1 border border-gray-300 rounded px-2.5 py-1.5">
+            <button onclick="importGoogleFont()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded">
+              Impor
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SAVE AS (PILIH LOKASI / FORMAT SIMPAN) -->
+  <div id="modal-save-as" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-96 border border-gray-300 overflow-hidden">
+      <div class="bg-word-800 text-white px-4 py-3 flex justify-between items-center">
+        <h3 class="font-semibold text-sm flex items-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Simpan Dokumen Sebagai...</h3>
+        <button onclick="closeModal('modal-save-as')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Nama File Dokumen:</label>
+          <input type="text" id="save-as-filename" class="w-full border border-gray-300 rounded px-2.5 py-1.5 font-medium focus:border-word-600 outline-none">
+        </div>
+        <span class="block font-semibold text-gray-500 uppercase text-[10px] tracking-wider pt-1">Pilih Tujuan / Format Penyimpanan:</span>
+        <div class="space-y-2">
+          <button onclick="executeSaveChoice('word')" class="w-full p-2.5 border border-gray-200 hover:border-word-600 hover:bg-blue-50/50 rounded-lg flex items-center gap-3 text-left transition">
+            <i class="fa-solid fa-file-word text-2xl text-word-800"></i>
+            <div>
+              <div class="font-bold text-gray-800">Simpan ke Perangkat (.DOC)</div>
+              <div class="text-[11px] text-gray-500">Unduh file dokumen kompatibel Microsoft Word</div>
+            </div>
+          </button>
+          <button onclick="executeSaveChoice('pdf')" class="w-full p-2.5 border border-gray-200 hover:border-red-500 hover:bg-red-50/40 rounded-lg flex items-center gap-3 text-left transition">
+            <i class="fa-solid fa-file-pdf text-2xl text-red-600"></i>
+            <div>
+              <div class="font-bold text-gray-800">Simpan sebagai PDF / Cetak</div>
+              <div class="text-[11px] text-gray-500">Ekspor dokumen multi-halaman ke format PDF</div>
+            </div>
+          </button>
+          <button onclick="executeSaveChoice('html')" class="w-full p-2.5 border border-gray-200 hover:border-emerald-600 hover:bg-emerald-50/40 rounded-lg flex items-center gap-3 text-left transition">
+            <i class="fa-solid fa-code text-2xl text-emerald-600"></i>
+            <div>
+              <div class="font-bold text-gray-800">Simpan Halaman Web (.HTML)</div>
+              <div class="text-[11px] text-gray-500">Unduh dokumen dalam format HTML standar</div>
+            </div>
+          </button>
+          <button onclick="executeSaveChoice('browser')" class="w-full p-2.5 border border-gray-200 hover:border-amber-500 hover:bg-amber-50/40 rounded-lg flex items-center gap-3 text-left transition">
+            <i class="fa-solid fa-cloud-arrow-up text-2xl text-amber-600"></i>
+            <div>
+              <div class="font-bold text-gray-800">Simpan di Memori Browser (Auto-Save)</div>
+              <div class="text-[11px] text-gray-500">Otomatis terbuka kembali saat Wordly dibuka</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INSERT TABLE (ENHANCED) -->
+  <div id="modal-table" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-80 border border-gray-300 overflow-hidden">
+      <div class="bg-word-800 text-white px-4 py-2.5 flex justify-between items-center">
+        <h3 class="font-semibold text-sm flex items-center gap-2"><i class="fa-solid fa-table"></i> Sisipkan Tabel Profesional</h3>
+        <button onclick="closeModal('modal-table')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">Jumlah Baris:</label>
+            <input type="number" id="table-rows" value="4" min="1" max="30" class="w-full border border-gray-300 rounded px-2.5 py-1.5">
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">Jumlah Kolom:</label>
+            <input type="number" id="table-cols" value="4" min="1" max="15" class="w-full border border-gray-300 rounded px-2.5 py-1.5">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Gaya Desain Tabel:</label>
+          <select id="table-theme-select" class="w-full border border-gray-300 rounded px-2.5 py-1.5 bg-white">
+            <option value="table-theme-blue">Biru Klasik MS Word (Header + Zebra)</option>
+            <option value="table-theme-green">Hijau Zamrud (Header + Zebra)</option>
+            <option value="table-theme-dark">Abu Elegan (Header + Zebra)</option>
+            <option value="">Polos Hitam Putih</option>
+          </select>
+        </div>
+        <button onclick="confirmInsertTable()" class="w-full py-2 bg-word-700 hover:bg-word-800 text-white font-semibold rounded shadow-sm">
+          Sisipkan Tabel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: WORDART -->
+  <div id="modal-wordart" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-80 border border-gray-300 overflow-hidden">
+      <div class="bg-word-800 text-white px-4 py-2.5 flex justify-between items-center">
+        <h3 class="font-semibold text-sm">Sisipkan WordArt</h3>
+        <button onclick="closeModal('modal-wordart')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 space-y-3 text-xs">
+        <input type="text" id="input-wordart-text" placeholder="Ketik teks WordArt..." class="w-full border border-gray-300 rounded px-2.5 py-1.5 font-bold">
+        <button onclick="confirmInsertWordArt()" class="w-full py-2 bg-word-700 hover:bg-word-800 text-white font-semibold rounded">
+          Pasang WordArt
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SHAPES -->
+  <div id="modal-shapes" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-80 border border-gray-300 overflow-hidden">
+      <div class="bg-word-800 text-white px-4 py-2.5 flex justify-between items-center">
+        <h3 class="font-semibold text-sm">Sisipkan Bentuk (Shapes)</h3>
+        <button onclick="closeModal('modal-shapes')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 grid grid-cols-2 gap-2.5 text-xs">
+        <button onclick="insertShape('rect')" class="p-3 border rounded hover:bg-blue-50 flex flex-col items-center gap-1.5 font-medium">
+          <div class="w-12 h-8 bg-blue-600 rounded"></div> Persegi Panjang
+        </button>
+        <button onclick="insertShape('circle')" class="p-3 border rounded hover:bg-blue-50 flex flex-col items-center gap-1.5 font-medium">
+          <div class="w-9 h-9 bg-emerald-600 rounded-full"></div> Lingkaran
+        </button>
+        <button onclick="insertShape('badge')" class="p-3 border rounded hover:bg-blue-50 flex flex-col items-center gap-1.5 font-medium">
+          <div class="px-3 py-1 bg-amber-500 text-white rounded-full font-bold">Label</div> Lencana / Pil
+        </button>
+        <button onclick="insertShape('arrow')" class="p-3 border rounded hover:bg-blue-50 flex flex-col items-center gap-1.5 font-medium">
+          <span class="text-2xl text-word-800">➔</span> Panah Kanan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INSERT IMAGE URL -->
+  <div id="modal-image-url" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-80 border border-gray-300 overflow-hidden">
+      <div class="bg-word-800 text-white px-4 py-2.5 flex justify-between items-center">
+        <h3 class="font-semibold text-sm">Sisipkan Gambar dari URL</h3>
+        <button onclick="closeModal('modal-image-url')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 space-y-3 text-xs">
+        <input type="url" id="input-img-url" placeholder="https://contoh.com/gambar.jpg" class="w-full border border-gray-300 rounded px-2.5 py-1.5">
+        <button onclick="confirmInsertImageUrl()" class="w-full py-2 bg-word-700 hover:bg-word-800 text-white font-semibold rounded">
+          Sisipkan Gambar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INSERT HYPERLINK -->
+  <div id="modal-link" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-80 border border-gray-300 overflow-hidden">
+      <div class="bg-word-800 text-white px-4 py-2.5 flex justify-between items-center">
+        <h3 class="font-semibold text-sm">Sisipkan Tautan Link</h3>
+        <button onclick="closeModal('modal-link')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 space-y-3 text-xs">
+        <input type="url" id="input-link-url" placeholder="https://google.com" class="w-full border border-gray-300 rounded px-2.5 py-1.5">
+        <button onclick="confirmInsertLink()" class="w-full py-2 bg-word-700 hover:bg-word-800 text-white font-semibold rounded">
+          Pasang Tautan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CUSTOM WATERMARK -->
+  <div id="modal-watermark" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-80 border border-gray-300 overflow-hidden">
+      <div class="bg-word-800 text-white px-4 py-2.5 flex justify-between items-center">
+        <h3 class="font-semibold text-sm">Teks Watermark Kustom</h3>
+        <button onclick="closeModal('modal-watermark')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 space-y-3 text-xs">
+        <input type="text" id="input-custom-watermark" placeholder="Contoh: KONFIDENSIAL" class="w-full border border-gray-300 rounded px-2.5 py-1.5 uppercase">
+        <button onclick="confirmCustomWatermark()" class="w-full py-2 bg-word-700 hover:bg-word-800 text-white font-semibold rounded">
+          Terapkan Watermark
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SPECIAL SYMBOLS -->
+  <div id="modal-symbols" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-80 border border-gray-300 overflow-hidden">
+      <div class="bg-word-800 text-white px-4 py-2.5 flex justify-between items-center">
+        <h3 class="font-semibold text-sm">Simbol Khusus</h3>
+        <button onclick="closeModal('modal-symbols')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 grid grid-cols-6 gap-2 text-center text-base">
+        <button onclick="insertSymbol('©')" class="p-2 border rounded hover:bg-blue-50">©</button>
+        <button onclick="insertSymbol('®')" class="p-2 border rounded hover:bg-blue-50">®</button>
+        <button onclick="insertSymbol('™')" class="p-2 border rounded hover:bg-blue-50">™</button>
+        <button onclick="insertSymbol('±')" class="p-2 border rounded hover:bg-blue-50">±</button>
+        <button onclick="insertSymbol('≠')" class="p-2 border rounded hover:bg-blue-50">≠</button>
+        <button onclick="insertSymbol('≈')" class="p-2 border rounded hover:bg-blue-50">≈</button>
+        <button onclick="insertSymbol('≤')" class="p-2 border rounded hover:bg-blue-50">≤</button>
+        <button onclick="insertSymbol('≥')" class="p-2 border rounded hover:bg-blue-50">≥</button>
+        <button onclick="insertSymbol('÷')" class="p-2 border rounded hover:bg-blue-50">÷</button>
+        <button onclick="insertSymbol('×')" class="p-2 border rounded hover:bg-blue-50">×</button>
+        <button onclick="insertSymbol('°')" class="p-2 border rounded hover:bg-blue-50">°</button>
+        <button onclick="insertSymbol('✓')" class="p-2 border rounded hover:bg-blue-50">✓</button>
+        <button onclick="insertSymbol('★')" class="p-2 border rounded hover:bg-blue-50">★</button>
+        <button onclick="insertSymbol('→')" class="p-2 border rounded hover:bg-blue-50">→</button>
+        <button onclick="insertSymbol('←')" class="p-2 border rounded hover:bg-blue-50">←</button>
+        <button onclick="insertSymbol('↑')" class="p-2 border rounded hover:bg-blue-50">↑</button>
+        <button onclick="insertSymbol('↓')" class="p-2 border rounded hover:bg-blue-50">↓</button>
+        <button onclick="insertSymbol('§')" class="p-2 border rounded hover:bg-blue-50">§</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: FIND & REPLACE -->
+  <div id="modal-find-replace" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-80 border border-gray-300 overflow-hidden">
+      <div class="bg-word-800 text-white px-4 py-2.5 flex justify-between items-center">
+        <h3 class="font-semibold text-sm">Cari & Ganti Teks</h3>
+        <button onclick="closeModal('modal-find-replace')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Cari Kata:</label>
+          <input type="text" id="find-text-input" placeholder="Ketik kata yang dicari..." class="w-full border border-gray-300 rounded px-2.5 py-1.5">
+        </div>
+        <div>
+          <label class="block font-semibold text-gray-700 mb-1">Ganti Dengan:</label>
+          <input type="text" id="replace-text-input" placeholder="Ketik kata pengganti..." class="w-full border border-gray-300 rounded px-2.5 py-1.5">
+        </div>
+        <button onclick="executeFindAndReplace()" class="w-full py-2 bg-word-700 hover:bg-word-800 text-white font-semibold rounded">
+          Ganti Semua di Dokumen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: WORD COUNT STATS -->
+  <div id="modal-word-stats" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-80 border border-gray-300 overflow-hidden">
+      <div class="bg-word-800 text-white px-4 py-2.5 flex justify-between items-center">
+        <h3 class="font-semibold text-sm">Statistik Dokumen</h3>
+        <button onclick="closeModal('modal-word-stats')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-4 space-y-2 text-xs text-gray-700">
+        <div class="flex justify-between py-1 border-b"><span>Jumlah Halaman:</span><strong id="stat-modal-pages">1</strong></div>
+        <div class="flex justify-between py-1 border-b"><span>Jumlah Kata:</span><strong id="stat-modal-words">0</strong></div>
+        <div class="flex justify-between py-1 border-b"><span>Karakter (dengan spasi):</span><strong id="stat-modal-chars">0</strong></div>
+        <div class="flex justify-between py-1 border-b"><span>Karakter (tanpa spasi):</span><strong id="stat-modal-chars-nospace">0</strong></div>
+        <div class="flex justify-between py-1"><span>Jumlah Paragraf:</span><strong id="stat-modal-paragraphs">0</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ABOUT WORLDLY -->
+  <div id="modal-about" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-96 border border-gray-200 overflow-hidden text-center p-6 space-y-4">
+      <div class="w-24 h-24 mx-auto flex items-center justify-center bg-word-50 rounded-2xl p-2.5 shadow-inner border border-blue-100">
+        <img src="https://cdn.phototourl.com/anon/2026-11-21-062d6fc4-a000-4653-9d8a-2485bd50420b.png" alt="Wordly" class="w-full h-full object-contain">
+      </div>
+      <div>
+        <h2 class="text-xl font-extrabold text-gray-900">Wordly Professional</h2>
+        <p class="text-xs text-word-700 font-semibold">Versi 4.0 Paten & Real Engine</p>
+      </div>
+      <p class="text-xs text-gray-600 leading-relaxed">
+        Pengolah kata lengkap dengan dukungan multi-halaman fisik, impor font kustom, kuas format, watermark, tabel interaktif, dan cetak dokumen asli.
+      </p>
+      <button onclick="closeModal('modal-about')" class="w-full py-2 bg-word-700 hover:bg-word-800 text-white font-medium text-xs rounded shadow">
+        Tutup
+      </button>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast-notification" class="fixed bottom-10 right-5 bg-gray-900 text-white text-xs px-4 py-2.5 rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center gap-2">
+    <i class="fa-solid fa-circle-info text-blue-400"></i>
+    <span id="toast-message">Pesan notifikasi</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <script>
+    const pagesContainer = document.getElementById('pages-container');
+    const docTitle = document.getElementById('document-title');
+    const saveBadge = document.getElementById('save-status-badge');
+    const rulerContainer = document.getElementById('ruler-container');
+    
+    let activeEditor = document.querySelector('.editor-content');
+    let currentZoom = 100;
+    let autoSaveTimer = null;
+    let formatPainterStyles = null;
+    let currentWatermarkText = '';
+    let hasPageBorder = false;
+    let textCaseToggle = 0;
+    let savedSelectionRange = null;
+
+    // Save and Restore Selection so Modals, Dropdowns, and Color Pickers never lose cursor position
+    function saveSelection() {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        if (pagesContainer.contains(range.commonAncestorContainer)) {
+          savedSelectionRange = range.cloneRange();
+        }
+      }
+    }
+
+    function restoreSelection() {
+      if (savedSelectionRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedSelectionRange);
+      } else if (activeEditor) {
+        activeEditor.focus();
+      }
+    }
+
+    // Booting Splash Screen Sequence
+    window.addEventListener('DOMContentLoaded', () => {
+      const progressBar = document.getElementById('splash-progress');
+      const splashStatus = document.getElementById('splash-status');
+      const splashScreen = document.getElementById('splash-screen');
+      
+      setTimeout(() => {
+        progressBar.style.width = '45%';
+        if (splashStatus) splashStatus.textContent = 'Memuat font & pita peralatan...';
+      }, 200);
+      setTimeout(() => {
+        progressBar.style.width = '85%';
+        if (splashStatus) splashStatus.textContent = 'Mengaktifkan sistem multi-halaman...';
+      }, 500);
+      setTimeout(() => {
+        progressBar.style.width = '100%';
+        splashScreen.style.opacity = '0';
+        // Upayakan layar penuh otomatis saat booting selesai
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+        setTimeout(() => { splashScreen.style.display = 'none'; }, 450);
+      }, 850);
+
+      // Pastikan layar penuh aktif pada interaksi pertama di halaman web jika browser memblokir auto-fullscreen
+      const autoEnterFullscreen = () => {
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+        document.removeEventListener('pointerdown', autoEnterFullscreen);
+      };
+      document.addEventListener('pointerdown', autoEnterFullscreen, { once: true });
+    });
+
+    // Helper: Toast Notification
+    function showToast(msg) {
+      const toast = document.getElementById('toast-notification');
+      const toastMsg = document.getElementById('toast-message');
+      if (!toast || !toastMsg) return;
+      toastMsg.textContent = msg;
+      toast.classList.remove('opacity-0');
+      clearTimeout(window.toastTimeout);
+      window.toastTimeout = setTimeout(() => {
+        toast.classList.add('opacity-0');
+      }, 2800);
+    }
+
+    // Helper: Auto-Save & LocalStorage
+    function saveDocumentLocal() {
+      try {
+        localStorage.setItem('wordly_pages_html', pagesContainer.innerHTML);
+        localStorage.setItem('wordly_document_title', docTitle.value);
+        if (saveBadge) {
+          saveBadge.innerHTML = `<i class="fa-solid fa-cloud-check text-xs text-emerald-300"></i> Tersimpan`;
+        }
+      } catch (e) {
+        console.warn('Gagal menyimpan:', e);
+      }
+    }
+
+    function triggerAutoSave() {
+      if (saveBadge) {
+        saveBadge.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-xs"></i> Menyimpan...`;
+      }
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(saveDocumentLocal, 600);
+    }
+
+    // Bind events to all pages & editors
+    function bindPageEvents() {
+      document.querySelectorAll('.editor-content').forEach(ed => {
+        if (ed.dataset.bound === 'true') return;
+        ed.dataset.bound = 'true';
+
+        ed.addEventListener('focus', () => {
+          activeEditor = ed;
+          const page = ed.closest('.word-page');
+          if (page) {
+            const pNum = page.getAttribute('data-page-number') || '1';
+            const activeStat = document.getElementById('stat-active-page');
+            if (activeStat) activeStat.textContent = pNum;
+          }
+        });
+
+        ed.addEventListener('input', () => {
+          updateStats();
+          triggerAutoSave();
+        });
+
+        ed.addEventListener('mouseup', () => {
+          saveSelection();
+          checkTableContext();
+          applyFormatPainterIfActive();
+        });
+
+        ed.addEventListener('keyup', () => {
+          saveSelection();
+          checkTableContext();
+        });
+      });
+
+      if (docTitle && !docTitle.dataset.bound) {
+        docTitle.dataset.bound = 'true';
+        docTitle.addEventListener('input', triggerAutoSave);
+      }
+    }
+
+    // Initialize Application
+    window.onload = function() {
+      try {
+        const savedPages = localStorage.getItem('wordly_pages_html');
+        const savedTitle = localStorage.getItem('wordly_document_title');
+        if (savedPages && savedPages.trim().length > 0) {
+          pagesContainer.innerHTML = savedPages;
+        }
+        if (savedTitle) {
+          docTitle.value = savedTitle;
+        }
+      } catch (e) {
+        console.warn('Gagal memuat localStorage:', e);
+      }
+      bindPageEvents();
+      refreshPagesUI();
+      updateStats();
+    };
+
+    // Modal Helpers
+    function openModal(id) {
+      saveSelection();
+      if (id === 'modal-save-as') {
+        const fnInput = document.getElementById('save-as-filename');
+        if (fnInput) fnInput.value = docTitle.value || 'Dokumen1';
+      }
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+      restoreSelection();
+    }
+
+    function executeSaveChoice(mode) {
+      const fnInput = document.getElementById('save-as-filename');
+      if (fnInput && fnInput.value.trim()) {
+        docTitle.value = fnInput.value.trim();
+      }
+      closeModal('modal-save-as');
+      saveDocumentLocal();
+
+      if (mode === 'word') {
+        exportDoc('word');
+        showToast('File .DOC sedang diunduh ke komputer Anda!');
+      } else if (mode === 'html') {
+        exportDoc('html');
+        showToast('File .HTML sedang diunduh ke komputer Anda!');
+      } else if (mode === 'pdf') {
+        showToast('Pilih "Save as PDF" pada jendela cetak...');
+        triggerRealPrint();
+      } else {
+        showToast('Dokumen tersimpan aman di memori browser!');
+      }
+    }
+
+    // MULTI-PAGE MANAGEMENT
+    function addNewPage(initialHtml = '<p>Ketik isi halaman baru di sini...</p>') {
+      const existingPages = document.querySelectorAll('.word-page');
+      const newPageNum = existingPages.length + 1;
+      const firstPage = existingPages[0];
+
+      const pageDiv = document.createElement('div');
+      pageDiv.className = `word-page rounded-sm flex flex-col ${hasPageBorder ? 'page-bordered' : ''}`;
+      pageDiv.setAttribute('data-page-number', newPageNum);
+      pageDiv.style.width = firstPage ? firstPage.style.width : '794px';
+      pageDiv.style.minHeight = firstPage ? firstPage.style.minHeight : '1123px';
+      pageDiv.style.padding = firstPage ? firstPage.style.padding : '96px';
+      pageDiv.style.backgroundColor = firstPage ? firstPage.style.backgroundColor : '#FFFFFF';
+
+      const colsVal = document.getElementById('paper-columns-select').value;
+      const colsClass = colsVal !== '1' ? `cols-${colsVal}` : '';
+
+      pageDiv.innerHTML = `
+        <button onclick="deletePage(this)" class="page-action-bar no-print absolute top-2 right-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1 opacity-75 hover:opacity-100 transition" title="Hapus Halaman Ini">
+          <i class="fa-solid fa-trash-can"></i> Hapus Halaman ${newPageNum}
+        </button>
+        <div class="page-watermark ${currentWatermarkText ? '' : 'hidden'}">${currentWatermarkText}</div>
+        <div class="page-header text-xs text-gray-400 pb-3 border-b border-gray-100 mb-5 flex justify-between items-center outline-none" contenteditable="true">
+          <span>Header Dokumen Wordly</span>
+          <span>Dokumen Resmi</span>
+        </div>
+        <div class="editor-content flex-1 text-gray-900 leading-relaxed font-sans ${colsClass}" contenteditable="true" spellcheck="false">
+          ${initialHtml}
+        </div>
+        <div class="page-footer text-xs text-gray-400 pt-3 border-t border-gray-100 mt-5 flex justify-between items-center outline-none" contenteditable="true">
+          <span>Diolah dengan Wordly</span>
+          <span class="page-num-label">Halaman ${newPageNum}</span>
+        </div>
+      `;
+
+      pagesContainer.appendChild(pageDiv);
+      bindPageEvents();
+      refreshPagesUI();
+      triggerAutoSave();
+      updateStats();
+
+      const newEditor = pageDiv.querySelector('.editor-content');
+      newEditor.focus();
+      pageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showToast(`Halaman ${newPageNum} ditambahkan!`);
+    }
+
+    function deletePage(btn) {
+      const pages = document.querySelectorAll('.word-page');
+      if (pages.length <= 1) {
+        showToast('Minimal harus ada 1 halaman dalam dokumen.');
+        return;
+      }
+      btn.closest('.word-page').remove();
+      bindPageEvents();
+      refreshPagesUI();
+      triggerAutoSave();
+      updateStats();
+      showToast('Halaman dihapus.');
+    }
+
+    function deleteActivePage() {
+      const pages = document.querySelectorAll('.word-page');
+      if (pages.length <= 1) {
+        showToast('Minimal harus ada 1 halaman dalam dokumen.');
+        return;
+      }
+      const targetPage = activeEditor ? activeEditor.closest('.word-page') : pages[pages.length - 1];
+      if (targetPage) {
+        targetPage.remove();
+        activeEditor = document.querySelector('.editor-content');
+        bindPageEvents();
+        refreshPagesUI();
+        triggerAutoSave();
+        updateStats();
+        showToast('Halaman aktif berhasil dihapus!');
+      }
+    }
+
+    function deletePageByIndex(index) {
+      const pages = document.querySelectorAll('.word-page');
+      if (pages.length <= 1) {
+        showToast('Minimal harus ada 1 halaman dalam dokumen.');
+        return;
+      }
+      if (pages[index]) {
+        pages[index].remove();
+        activeEditor = document.querySelector('.editor-content');
+        bindPageEvents();
+        refreshPagesUI();
+        triggerAutoSave();
+        updateStats();
+        showToast(`Halaman ${index + 1} berhasil dihapus!`);
+      }
+    }
+
+    function refreshPagesUI() {
+      const pages = document.querySelectorAll('.word-page');
+      document.getElementById('stat-page-count').textContent = pages.length;
+      document.getElementById('stat-modal-pages').textContent = pages.length;
+
+      const sidebarPagesList = document.getElementById('sidebar-pages-list');
+      sidebarPagesList.innerHTML = '';
+
+      pages.forEach((page, index) => {
+        const num = index + 1;
+        page.setAttribute('data-page-number', num);
+        const label = page.querySelector('.page-num-label');
+        if (label) label.textContent = `Halaman ${num}`;
+
+        const delBtn = page.querySelector('.page-action-bar');
+        if (delBtn) delBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Hapus Halaman ${num}`;
+
+        const snippet = (page.querySelector('.editor-content')?.innerText || '').trim().slice(0, 60) || '(Halaman Kosong)';
+        const thumb = document.createElement('div');
+        thumb.className = 'p-2.5 border border-gray-200 hover:border-word-600 rounded bg-gray-50 hover:bg-blue-50/40 cursor-pointer transition group relative';
+        thumb.innerHTML = `
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-xs font-bold text-word-800">Halaman ${num}</span>
+            <div class="flex items-center gap-1.5">
+              ${pages.length > 1 ? `<button onclick="event.stopPropagation(); deletePageByIndex(${index})" class="text-red-500 hover:text-red-700 hover:bg-red-100 px-1.5 py-0.5 rounded text-[10px] font-semibold transition" title="Hapus Halaman ${num}"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+              <i class="fa-regular fa-file-lines text-gray-400 text-xs"></i>
+            </div>
+          </div>
+          <p class="text-[11px] text-gray-500 line-clamp-2">${snippet}</p>
+        `;
+        thumb.onclick = () => {
+          page.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          page.querySelector('.editor-content')?.focus();
+        };
+        sidebarPagesList.appendChild(thumb);
+      });
+
+      updateHeadingsOutline();
+    }
+
+    function updateHeadingsOutline() {
+      const headingsList = document.getElementById('sidebar-headings-list');
+      const headings = pagesContainer.querySelectorAll('.editor-content h1, .editor-content h2, .editor-content h3');
+      
+      if (headings.length === 0) {
+        headingsList.innerHTML = `<p class="text-gray-400 italic">Belum ada Judul (Judul 1/2)...</p>`;
+        return;
+      }
+
+      headingsList.innerHTML = '';
+      headings.forEach(h => {
+        const item = document.createElement('div');
+        const indent = h.tagName === 'H2' ? 'pl-3' : (h.tagName === 'H3' ? 'pl-6' : 'font-semibold text-word-800');
+        item.className = `py-1 px-2 hover:bg-blue-50 rounded cursor-pointer truncate ${indent}`;
+        item.textContent = h.innerText || '(Judul Tanpa Teks)';
+        item.onclick = () => {
+          h.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+        headingsList.appendChild(item);
+      });
+    }
+
+    // REAL PRINT ENGINE
+    function triggerRealPrint() {
+      const prevTransform = pagesContainer.style.transform;
+      pagesContainer.style.transform = 'none';
+      setTimeout(() => {
+        window.print();
+        pagesContainer.style.transform = prevTransform;
+      }, 150);
+    }
+
+    // Ribbon Tabs
+    function switchTab(tabName) {
+      document.querySelectorAll('.ribbon-tab').forEach(tab => {
+        tab.classList.remove('font-semibold', 'text-word-800', 'border-b-2', 'border-word-800');
+        tab.classList.add('text-gray-700');
+      });
+      document.querySelectorAll('.ribbon-content').forEach(content => {
+        content.classList.add('hidden');
+      });
+
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      const activeContent = document.getElementById(`tab-content-${tabName}`);
+      if (activeBtn && activeContent) {
+        activeBtn.classList.add('font-semibold', 'text-word-800', 'border-b-2', 'border-word-800');
+        activeBtn.classList.remove('text-gray-700');
+        activeContent.classList.remove('hidden');
+      }
+    }
+
+    function switchSidebarTab(tab) {
+      const pagesBtn = document.getElementById('side-tab-pages');
+      const headsBtn = document.getElementById('side-tab-headings');
+      const pagesList = document.getElementById('sidebar-pages-list');
+      const headsList = document.getElementById('sidebar-headings-list');
+
+      if (tab === 'pages') {
+        pagesBtn.className = 'flex-1 py-2 text-word-800 border-b-2 border-word-800 bg-blue-50/40';
+        headsBtn.className = 'flex-1 py-2 text-gray-600 hover:bg-gray-50';
+        pagesList.classList.remove('hidden');
+        headsList.classList.add('hidden');
+      } else {
+        headsBtn.className = 'flex-1 py-2 text-word-800 border-b-2 border-word-800 bg-blue-50/40';
+        pagesBtn.className = 'flex-1 py-2 text-gray-600 hover:bg-gray-50';
+        headsList.classList.remove('hidden');
+        pagesList.classList.add('hidden');
+      }
+    }
+
+    function toggleNavSidebar(show) {
+      const sidebar = document.getElementById('nav-sidebar');
+      const chk = document.getElementById('toggle-nav-pane');
+      if (chk) chk.checked = show;
+      if (show) {
+        sidebar.style.display = 'flex';
+        sidebar.classList.remove('hidden');
+      } else {
+        sidebar.style.display = 'none';
+        sidebar.classList.add('hidden');
+      }
+    }
+
+    // Rich-text Formatting
+    function execCmd(command, value = null) {
+      restoreSelection();
+      document.execCommand(command, false, value);
+      saveSelection();
+      triggerAutoSave();
+      updateHeadingsOutline();
+    }
+
+    function applyColorCmd(command, colorVal) {
+      restoreSelection();
+      document.execCommand('styleWithCSS', false, true);
+      document.execCommand(command, false, colorVal);
+      saveSelection();
+      triggerAutoSave();
+    }
+
+    function tableAddCol() {
+      if (!window.activeTableCell) return;
+      const cellIndex = window.activeTableCell.cellIndex;
+      const table = window.activeTableCell.closest('table');
+      Array.from(table.rows).forEach((row, rIdx) => {
+        const isHeader = row.parentElement && row.parentElement.tagName === 'THEAD';
+        const newCell = isHeader ? document.createElement('th') : document.createElement('td');
+        newCell.style.border = '1px solid #8A8886';
+        newCell.style.padding = '8px 12px';
+        newCell.innerHTML = isHeader ? 'Kolom Baru' : 'Sel Baru';
+        if (row.cells[cellIndex + 1]) {
+          row.insertBefore(newCell, row.cells[cellIndex + 1]);
+        } else {
+          row.appendChild(newCell);
+        }
+      });
+      triggerAutoSave();
+    }
+
+    function tableSetCellBg(color) {
+      if (!window.activeTableCell) return;
+      window.activeTableCell.style.backgroundColor = color;
+      triggerAutoSave();
+    }
+
+    function tableDeleteEntire() {
+      if (!window.activeTableCell) return;
+      const table = window.activeTableCell.closest('table');
+      if (table) table.remove();
+      checkTableContext();
+      triggerAutoSave();
+      showToast('Tabel dihapus.');
+    }
+
+    function tableDeleteRow() {
+      if (!window.activeTableCell) return;
+      const tr = window.activeTableCell.parentElement;
+      const table = tr.closest('table');
+      if (table.rows.length > 1) tr.remove();
+      else table.remove();
+      checkTableContext();
+      triggerAutoSave();
+    }
+
+    function tableDeleteCol() {
+      if (!window.activeTableCell) return;
+      const cellIndex = window.activeTableCell.cellIndex;
+      const table = window.activeTableCell.closest('table');
+      Array.from(table.rows).forEach(row => {
+        if (row.cells.length > 1) row.deleteCell(cellIndex);
+      });
+      triggerAutoSave();
+    }
+
+    // INSERT OBJECTS
+    function insertImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imgHtml = `<img src="${e.target.result}" style="max-width: 100%; height: auto; border-radius: 4px; margin: 10px 0;" alt="Gambar">`;
+        execCmd('insertHTML', imgHtml);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function confirmInsertImageUrl() {
+      const url = document.getElementById('input-img-url').value.trim();
+      if (url) {
+        execCmd('insertHTML', `<img src="${url}" style="max-width: 100%; height: auto; border-radius: 4px; margin: 10px 0;" alt="Gambar Web">`);
+      }
+      document.getElementById('input-img-url').value = '';
+      closeModal('modal-image-url');
+    }
+
+    function confirmInsertLink() {
+      const url = document.getElementById('input-link-url').value.trim();
+      if (url) {
+        execCmd('createLink', url);
+      }
+      document.getElementById('input-link-url').value = '';
+      closeModal('modal-link');
+    }
+
+    function insertPageBreak() {
+      execCmd('insertHTML', `<div style="border-top: 2px dashed #94A3B8; margin: 20px 0; text-align: center; color: #64748B; font-size: 11px; page-break-after: always;">--- Pemisah Halaman ---</div><p><br></p>`);
+    }
+
+    function insertDateTime() {
+      const now = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      execCmd('insertText', now);
+    }
+
+    function insertChecklist() {
+      execCmd('insertHTML', `<div style="display:flex; align-items:center; gap:8px; margin:4px 0;"><input type="checkbox" style="width:15px; height:15px;"> <span>Item tugas...</span></div>`);
+    }
+
+    function insertSymbol(sym) {
+      closeModal('modal-symbols');
+      execCmd('insertText', sym);
+    }
+
+    function insertCalloutBox() {
+      execCmd('insertHTML', `<div style="border:1px solid #185ABD; background:#F0F6FF; padding:12px 16px; border-radius:6px; margin:12px 0;"><strong>Kotak Catatan:</strong> Ketik informasi penting di sini...</div><p><br></p>`);
+    }
+
+    function confirmInsertWordArt() {
+      const txt = document.getElementById('input-wordart-text').value.trim() || 'WordArt Wordly';
+      closeModal('modal-wordart');
+      execCmd('insertHTML', `<div style="margin:12px 0;"><span class="wordart-text">${txt}</span></div><p><br></p>`);
+    }
+
+    function toggleDropCap() {
+      restoreSelection();
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      let node = sel.anchorNode;
+      while (node && node !== activeEditor && node.tagName !== 'P') {
+        node = node.parentNode;
+      }
+      if (node && node.tagName === 'P') {
+        node.classList.toggle('word-drop-cap');
+        triggerAutoSave();
+        showToast('Drop Cap diterapkan pada paragraf!');
+      } else {
+        showToast('Letakkan kursor di dalam paragraf teks terlebih dahulu.');
+      }
+    }
+
+    function insertShape(type) {
+      closeModal('modal-shapes');
+      let shapeHtml = '';
+      if (type === 'rect') {
+        shapeHtml = `<div contenteditable="true" style="width:180px; height:90px; background:#0F6CBD; color:white; display:flex; align-items:center; justify-content:center; border-radius:8px; margin:10px 0; font-weight:600;">Teks Bentuk</div>`;
+      } else if (type === 'circle') {
+        shapeHtml = `<div contenteditable="true" style="width:110px; height:110px; background:#059669; color:white; display:flex; align-items:center; justify-content:center; border-radius:9999px; margin:10px 0; font-weight:600; text-align:center;">Lingkaran</div>`;
+      } else if (type === 'badge') {
+        shapeHtml = `<span contenteditable="true" style="display:inline-block; padding:4px 14px; background:#F59E0B; color:white; border-radius:9999px; font-weight:700; font-size:12px; margin:4px;">LABEL PENTING</span>`;
+      } else if (type === 'arrow') {
+        shapeHtml = `<span style="font-size:28px; color:#185ABD; font-weight:bold;">➔</span>`;
+      }
+      execCmd('insertHTML', shapeHtml);
+    }
+
+    // REFERENCES TAB FUNCTIONS
+    function insertAutoTOC() {
+      const headings = pagesContainer.querySelectorAll('.editor-content h1, .editor-content h2');
+      let tocHtml = `<div style="border:1px solid #CBD5E1; background:#F8FAFC; padding:16px 20px; border-radius:8px; margin:14px 0;"><h3 style="margin-top:0; color:#185ABD; border-bottom:1px solid #CBD5E1; padding-bottom:6px;">DAFTAR ISI</h3><ul style="list-style:none; padding-left:0; margin:0; space-y:4px;">`;
+      if (headings.length === 0) {
+        tocHtml += `<li style="color:#64748B; font-style:italic;">(Belum ada Judul 1 atau Judul 2 pada dokumen)</li>`;
+      } else {
+        headings.forEach((h, i) => {
+          const pad = h.tagName === 'H2' ? 'padding-left:18px;' : 'font-weight:600;';
+          tocHtml += `<li style="${pad} margin:4px 0;">${i + 1}. ${h.innerText}</li>`;
+        });
+      }
+      tocHtml += `</ul></div><p><br></p>`;
+      execCmd('insertHTML', tocHtml);
+      showToast('Daftar Isi otomatis berhasil dibuat!');
+    }
+
+    function insertFootnote() {
+      const noteNum = document.querySelectorAll('.word-footnote-ref').length + 1;
+      execCmd('insertHTML', `<sup class="word-footnote-ref" style="color:#185ABD; font-weight:700;">[${noteNum}]</sup>`);
+      if (activeEditor) {
+        activeEditor.insertAdjacentHTML('beforeend', `<p style="font-size:11px; color:#475569; border-top:1px solid #CBD5E1; padding-top:4px; margin-top:12px;"><sup>[${noteNum}]</sup> Catatan kaki ${noteNum}: Ketik sumber referensi di sini...</p>`);
+      }
+      triggerAutoSave();
+    }
+
+    function insertCitation() {
+      execCmd('insertText', '(Santoso, 2026)');
+    }
+
+    function executeFindAndReplace() {
+      const findStr = document.getElementById('find-text-input').value;
+      const replaceStr = document.getElementById('replace-text-input').value;
+      if (!findStr) {
+        showToast('Masukkan kata yang ingin dicari terlebih dahulu.');
+        return;
+      }
+      const escaped = findStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, 'g');
+      let count = 0;
+      document.querySelectorAll('.editor-content').forEach(ed => {
+        const matches = ed.innerHTML.match(regex);
+        if (matches) count += matches.length;
+        ed.innerHTML = ed.innerHTML.replace(regex, replaceStr);
+      });
+      closeModal('modal-find-replace');
+      triggerAutoSave();
+      updateStats();
+      showToast(`Berhasil mengganti ${count} kecocokan teks.`);
+    }
+
+    // DESIGN TAB FUNCTIONS
+    function handleWatermarkSelect(val) {
+      if (val === 'CUSTOM') {
+        openModal('modal-watermark');
+        return;
+      }
+      applyWatermarkText(val);
+    }
+
+    function confirmCustomWatermark() {
+      const txt = document.getElementById('input-custom-watermark').value.trim();
+      closeModal('modal-watermark');
+      applyWatermarkText(txt);
+    }
+
+    function applyWatermarkText(text) {
+      currentWatermarkText = text;
+      document.querySelectorAll('.page-watermark').forEach(wm => {
+        wm.textContent = text;
+        if (text) wm.classList.remove('hidden');
+        else wm.classList.add('hidden');
+      });
+      triggerAutoSave();
+    }
+
+    function togglePageBorder(enabled) {
+      hasPageBorder = enabled;
+      document.querySelectorAll('.word-page').forEach(page => {
+        if (enabled) page.classList.add('page-bordered');
+        else page.classList.remove('page-bordered');
+      });
+      triggerAutoSave();
+    }
+
+    function changePageBgColor(color) {
+      document.querySelectorAll('.word-page').forEach(page => {
+        page.style.backgroundColor = color;
+      });
+      triggerAutoSave();
+    }
+
+    // LAYOUT TAB FUNCTIONS
+    function changePageLayout() {
+      const size = document.getElementById('paper-size-select').value;
+      const orientation = document.getElementById('paper-orientation-select').value;
+      const margin = document.getElementById('paper-margin-select').value;
+
+      let w = 794;
+      let h = 1123;
+      if (size === 'letter') { w = 816; h = 1056; }
+      if (size === 'legal') { w = 816; h = 1344; }
+      if (size === 'f4') { w = 812; h = 1247; }
+
+      if (orientation === 'landscape') {
+        const temp = w;
+        w = h;
+        h = temp;
+      }
+
+      let pad = '96px';
+      if (margin === 'narrow') pad = '48px';
+      if (margin === 'moderate') pad = '72px 96px';
+      if (margin === 'wide') pad = '96px 160px';
+
+      document.querySelectorAll('.word-page').forEach(page => {
+        page.style.width = `${w}px`;
+        page.style.minHeight = `${h}px`;
+        page.style.padding = pad;
+      });
+
+      rulerContainer.style.width = `${w}px`;
+      triggerAutoSave();
+    }
+
+    function changeColumns(cols) {
+      document.querySelectorAll('.editor-content').forEach(ed => {
+        ed.classList.remove('cols-2', 'cols-3');
+        if (cols === '2') ed.classList.add('cols-2');
+        if (cols === '3') ed.classList.add('cols-3');
+      });
+      triggerAutoSave();
+    }
+
+    // VIEW & ZOOM
+    function toggleRuler(show) {
+      rulerContainer.style.display = show ? 'flex' : 'none';
+    }
+
+    function setZoom(val) {
+      currentZoom = parseInt(val);
+      document.getElementById('zoom-slider').value = currentZoom;
+      document.getElementById('zoom-display').textContent = `${currentZoom}%`;
+      pagesContainer.style.transform = `scale(${currentZoom / 100})`;
+    }
+
+    function adjustZoom(delta) {
+      setZoom(Math.max(50, Math.min(160, currentZoom + delta)));
+    }
+
+    function toggleFocusMode() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    // WORD COUNT STATS
+    function updateStats() {
+      let fullText = '';
+      document.querySelectorAll('.editor-content').forEach(ed => {
+        fullText += (ed.innerText || ed.textContent || '') + '\n';
+      });
+
+      const words = fullText.trim() ? fullText.trim().split(/\s+/).length : 0;
+      const chars = fullText.trim().length;
+      const charsNoSpace = fullText.replace(/\s/g, '').length;
+      const paragraphs = fullText.split(/\n+/).filter(p => p.trim().length > 0).length;
+
+      document.getElementById('stat-word-count').textContent = words;
+      document.getElementById('stat-char-count').textContent = chars;
+      document.getElementById('stat-modal-words').textContent = words;
+      document.getElementById('stat-modal-chars').textContent = chars;
+      document.getElementById('stat-modal-chars-nospace').textContent = charsNoSpace;
+      document.getElementById('stat-modal-paragraphs').textContent = paragraphs;
+      refreshPagesUI();
+    }
+
+    function showWordCountModal() {
+      updateStats();
+      openModal('modal-word-stats');
+    }
+
+    // TEMPLATES
+    function loadTemplate(type) {
+      let html = '';
+      if (type === 'surat') {
+        docTitle.value = 'Surat_Resmi_Perusahaan';
+        html = `
+          <div style="text-align:center; border-bottom: 3px double #000; padding-bottom: 10px; margin-bottom: 20px;">
+            <h2 style="margin:0; color:#000;">PT. WORDLY NUSANTARA TEKNOLOGI</h2>
+            <p style="margin:2px 0; font-size:12px;">Jl. Jenderal Sudirman Kav. 45, Jakarta Selatan | Telp: (021) 555-0199</p>
+          </div>
+          <p style="text-align:right;">Jakarta, 20 November 2026</p>
+          <p><strong>Nomor:</strong> 042/WNT-DIR/XI/2026<br><strong>Perihal:</strong> Undangan Rapat Kerja Tahunan</p>
+          <p>Kepada Yth.<br><strong>Bapak/Ibu Pimpinan Divisi</strong><br>Di Tempat</p>
+          <p>Dengan hormat,</p>
+          <p>Sehubungan dengan persiapan program kerja tahun mendatang, kami mengundang Bapak/Ibu untuk menghadiri rapat koordinasi yang akan dilaksanakan pada:</p>
+          <ul>
+            <li><strong>Hari/Tanggal:</strong> Senin, 23 November 2026</li>
+            <li><strong>Waktu:</strong> 09.00 WIB – Selesai</li>
+            <li><strong>Tempat:</strong> Ruang Rapat Utama Lantai 5</li>
+          </ul>
+          <p>Demikian surat undangan ini kami sampaikan. Atas perhatian dan kehadirannya kami ucapkan terima kasih.</p>
+          <div style="margin-top:40px; text-align:right;">
+            <p>Hormat kami,</p><br><br>
+            <p><strong><u>Budi Santoso, S.Kom.</u></strong><br>Direktur Operasional</p>
+          </div>
+        `;
+      } else if (type === 'cv') {
+        docTitle.value = 'Curriculum_Vitae';
+        html = `
+          <h1 style="margin-bottom:2px;">ANDI PRATAMA</h1>
+          <p style="color:#555; margin-top:0;">Product Designer & Frontend Developer | andi.pratama@email.com | +62 812-3456-7890</p>
+          <hr>
+          <h2>PROFIL SINGKAT</h2>
+          <p>Profesional kreatif dengan pengalaman lebih dari 5 tahun dalam merancang antarmuka web modern, sistem desain, dan aplikasi produktivitas.</p>
+          <h2>PENGALAMAN KERJA</h2>
+          <p><strong>Senior UI/UX Engineer — PT Digital Kreatif</strong> (2023 – Sekarang)</p>
+          <ul>
+            <li>Memimpin perancangan sistem desain aplikasi berbasis cloud untuk 100.000+ pengguna aktif.</li>
+            <li>Meningkatkan efisiensi alur kerja pengguna hingga 40%.</li>
+          </ul>
+          <h2>PENDIDIKAN</h2>
+          <p><strong>S1 Teknik Informatika</strong> — Universitas Indonesia (IPK 3.85)</p>
+        `;
+      } else if (type === 'makalah') {
+        docTitle.value = 'Laporan_Makalah_Akademik';
+        html = `
+          <div style="text-align:center; padding-top: 80px;">
+            <h1 style="font-size:28px; color:#000;">LAPORAN ANALISIS TRANSFORMASI DIGITAL</h1>
+            <p style="font-size:16px; color:#444;">Disusun untuk Memenuhi Tugas Penelitian Ilmiah</p>
+            <br><br><br>
+            <p><strong>Disusun Oleh:</strong><br>Tim Peneliti Wordly<br>NIM: 2026001122</p>
+            <br><br><br>
+            <p><strong>FAKULTAS ILMU KOMPUTER<br>2026</strong></p>
+          </div>
+        `;
+      }
+
+      const firstEditor = document.querySelector('.editor-content');
+      if (firstEditor) {
+        firstEditor.innerHTML = html;
+        triggerAutoSave();
+        updateStats();
+        showToast('Template berhasil dimuat!');
+      }
+    }
+
+    // EXPORT & FILE OPERATIONS
+    function exportDoc(type) {
+      const title = docTitle.value || 'Dokumen_Wordly';
+      let mimeType = 'text/plain';
+      let extension = '.txt';
+      let content = '';
+
+      let combinedHtml = '';
+      let combinedText = '';
+      document.querySelectorAll('.word-page').forEach((page, idx) => {
+        const ed = page.querySelector('.editor-content');
+        combinedHtml += `<div style="page-break-after: always;">${ed.innerHTML}</div>`;
+        combinedText += `--- Halaman ${idx + 1} ---\n${ed.innerText}\n\n`;
+      });
+
+      if (type === 'word') {
+        mimeType = 'application/msword';
+        extension = '.doc';
+        content = `
+          <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+          <head><title>${title}</title><meta charset='utf-8'></head>
+          <body>${combinedHtml}</body>
+          </html>`;
+      } else if (type === 'html') {
+        mimeType = 'text/html';
+        extension = '.html';
+        content = `<!DOCTYPE html><html><head><meta charset='utf-8'><title>${title}</title></head><body>${combinedHtml}</body></html>`;
+      } else {
+        content = combinedText;
+      }
+
+      const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${title}${extension}`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function openFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const firstEditor = document.querySelector('.editor-content');
+        if (file.name.endsWith('.txt')) {
+          firstEditor.innerText = e.target.result;
+        } else {
+          firstEditor.innerHTML = e.target.result;
+        }
+        docTitle.value = file.name.replace(/\.[^/.]+$/, "");
+        triggerAutoSave();
+        updateStats();
+        showToast('File berhasil dibuka!');
+      };
+      reader.readAsText(file);
+    }
+
+    function createNewDoc() {
+      const pages = document.querySelectorAll('.word-page');
+      pages.forEach((p, idx) => {
+        if (idx > 0) p.remove();
+      });
+      const firstEd = document.querySelector('.editor-content');
+      if (firstEd) firstEd.innerHTML = "<p><br></p>";
+      docTitle.value = "Dokumen Baru";
+      bindPageEvents();
+      triggerAutoSave();
+      updateStats();
+      showToast("Dokumen baru dibuat!");
+    }
+
+    function clearLocalStorage() {
+      localStorage.removeItem('wordly_pages_html');
+      localStorage.removeItem('wordly_document_title');
+      location.reload();
+    }
+
+    // KEYBOARD SHORTCUTS
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 's' || e.key === 'S') {
+          e.preventDefault();
+          openModal('modal-save-as');
+        }
+        if (e.key === 'f' || e.key === 'F') {
+          e.preventDefault();
+          openModal('modal-find-replace');
+        }
+        if (e.key === 'p' || e.key === 'P') {
+          e.preventDefault();
+          triggerRealPrint();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
