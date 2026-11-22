@@ -93,10 +93,11 @@
     /* Interactive Paper Sheet */
     .word-page {
       background: #FFFFFF;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14), 0 1px 3px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.06);
+      border: 1px solid #E2E8F0;
       transition: width 0.25s ease, min-height 0.25s ease, padding 0.25s ease, background-color 0.25s ease;
       position: relative;
-      margin-bottom: 28px;
+      margin-bottom: 32px;
       overflow: hidden;
     }
 
@@ -205,12 +206,6 @@
       padding: 4px 2px;
     }
 
-    .editor-content table td, .editor-content table th {
-      border: 1px solid #8A8886;
-      padding: 8px 12px;
-      min-width: 40px;
-    }
-
     .editor-content blockquote {
       border-left: 4px solid #106EBE;
       margin: 10px 0;
@@ -288,10 +283,10 @@
   </div>
 
   <!-- TOP HEADER / APP BAR -->
-  <header class="top-header bg-gradient-to-r from-word-900 via-word-800 to-word-700 text-white flex items-center justify-between px-4 py-2 shadow-md z-30 shrink-0">
+  <header class="top-header bg-gradient-to-r from-[#0B3574] via-[#104A9E] to-[#185ABD] text-white flex items-center justify-between px-4 py-2.5 shadow-lg z-30 shrink-0 border-b border-blue-400/20">
     <div class="flex items-center space-x-3">
       <!-- Official Wordly Logo -->
-      <div class="w-9 h-9 flex items-center justify-center relative cursor-pointer bg-white rounded-xl p-1 shadow-sm hover:scale-105 transition" onclick="openModal('modal-about')" title="Tentang Wordly">
+      <div class="w-9 h-9 flex items-center justify-center relative cursor-pointer bg-white rounded-xl p-1 shadow-md hover:scale-105 transition ring-2 ring-white/20" onclick="openModal('modal-about')" title="Tentang Wordly">
         <img src="https://cdn.phototourl.com/anon/2026-11-21-062d6fc4-a000-4653-9d8a-2485bd50420b.png" alt="Wordly" class="w-full h-full object-contain" onerror="this.onerror=null; this.style.display='none'; document.getElementById('logo-fallback').classList.remove('hidden');">
         <svg id="logo-fallback" class="w-7 h-7 hidden" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect width="100" height="100" rx="22" fill="#0078D4"/>
@@ -300,72 +295,72 @@
       </div>
 
       <div class="flex items-center space-x-2">
-        <span class="font-bold tracking-wide text-blue-100 text-sm">Wordly</span>
-        <span class="text-blue-300">|</span>
-        <input type="text" id="document-title" value="Dokumen1" class="bg-transparent hover:bg-word-700 focus:bg-white focus:text-gray-900 px-2 py-0.5 rounded text-sm font-semibold outline-none transition text-white w-36 sm:w-48" title="Klik untuk mengubah nama dokumen">
-        <span id="save-status-badge" class="hidden sm:flex text-xs bg-word-700/80 px-2 py-0.5 rounded text-blue-100 items-center gap-1">
-          <i class="fa-solid fa-cloud-check text-xs"></i> Tersimpan
+        <span class="font-extrabold tracking-wide text-white text-base drop-shadow-xs">Wordly</span>
+        <span class="text-blue-300/60">|</span>
+        <input type="text" id="document-title" value="Dokumen1" class="bg-white/10 hover:bg-white/20 focus:bg-white focus:text-gray-900 px-2.5 py-1 rounded-md text-xs sm:text-sm font-semibold outline-none transition text-white w-36 sm:w-52 border border-white/15" title="Klik untuk mengubah nama dokumen">
+        <span id="save-status-badge" class="hidden md:flex text-[11px] bg-blue-950/50 border border-blue-400/20 px-2.5 py-1 rounded-full text-blue-100 items-center gap-1.5">
+          <i class="fa-solid fa-cloud-check text-xs text-emerald-300"></i> Tersimpan
         </span>
       </div>
     </div>
 
     <!-- Quick Access Actions -->
     <div class="flex items-center space-x-1.5">
-      <button onclick="addNewPage()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-xs font-semibold flex items-center gap-1.5 shadow-sm transition" title="Tambah Lembar Halaman Baru">
+      <button onclick="addNewPage()" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition active:scale-95" title="Tambah Lembar Halaman Baru">
         <i class="fa-solid fa-file-circle-plus"></i>
         <span>+ Halaman</span>
       </button>
-      <button onclick="deleteActivePage()" class="px-2.5 py-1 bg-red-600 hover:bg-red-500 rounded text-xs font-semibold flex items-center gap-1.5 shadow-sm transition" title="Hapus Halaman Aktif Saat Ini">
+      <button onclick="deleteActivePage()" class="px-3 py-1.5 bg-rose-500 hover:bg-rose-400 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition active:scale-95" title="Hapus Halaman Aktif Saat Ini">
         <i class="fa-solid fa-file-circle-minus"></i>
-        <span>- Hapus Halaman</span>
+        <span class="hidden sm:inline">- Hapus</span>
       </button>
-      <button onclick="openModal('modal-save-as')" class="px-2.5 py-1 bg-word-700 hover:bg-word-600 border border-blue-400/30 rounded text-xs font-semibold flex items-center gap-1.5 text-white transition" title="Simpan Dokumen (Ctrl+S)">
+      <button onclick="openModal('modal-save-as')" class="px-3 py-1.5 bg-white/15 hover:bg-white/25 border border-white/25 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-white transition active:scale-95" title="Simpan Dokumen (Ctrl+S)">
         <i class="fa-solid fa-floppy-disk"></i>
         <span class="hidden sm:inline">Simpan</span>
       </button>
-      <button onclick="execCmd('undo')" class="p-1.5 hover:bg-word-700 rounded text-white transition" title="Urungkan (Ctrl+Z)">
+      <button onclick="execCmd('undo')" class="w-8 h-8 flex items-center justify-center hover:bg-white/15 rounded-lg text-white transition" title="Urungkan (Ctrl+Z)">
         <i class="fa-solid fa-rotate-left"></i>
       </button>
-      <button onclick="execCmd('redo')" class="p-1.5 hover:bg-word-700 rounded text-white transition" title="Ulangi (Ctrl+Y)">
+      <button onclick="execCmd('redo')" class="w-8 h-8 flex items-center justify-center hover:bg-white/15 rounded-lg text-white transition" title="Ulangi (Ctrl+Y)">
         <i class="fa-solid fa-rotate-right"></i>
       </button>
-      <div class="h-4 w-px bg-word-600 mx-1"></div>
-      <button onclick="triggerRealPrint()" class="px-3 py-1 bg-white text-word-800 hover:bg-blue-50 rounded text-xs font-bold flex items-center gap-1.5 shadow-sm transition" title="Cetak Dokumen Asli (Ctrl+P)">
-        <i class="fa-solid fa-print"></i>
+      <div class="h-5 w-px bg-white/20 mx-1"></div>
+      <button onclick="triggerRealPrint()" class="px-3.5 py-1.5 bg-white text-word-800 hover:bg-blue-50 rounded-lg text-xs font-extrabold flex items-center gap-1.5 shadow-md transition active:scale-95" title="Cetak Dokumen Asli (Ctrl+P)">
+        <i class="fa-solid fa-print text-word-700"></i>
         <span>Print Asli</span>
       </button>
     </div>
   </header>
 
   <!-- RIBBON TABS NAV -->
-  <nav class="ribbon-bar bg-gray-100 border-b border-gray-300 px-3 pt-1 flex items-center justify-between text-sm font-medium shrink-0">
+  <nav class="ribbon-bar bg-[#F8FAFC] border-b border-slate-200 px-4 pt-1.5 flex items-center justify-between text-xs sm:text-sm font-medium shrink-0">
     <div class="flex items-center space-x-1 overflow-x-auto">
-      <button onclick="switchTab('file')" id="tab-btn-file" class="ribbon-tab text-gray-700 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">File</button>
-      <button onclick="switchTab('home')" id="tab-btn-home" class="ribbon-tab font-semibold text-word-800 border-b-2 border-word-800 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">Beranda</button>
-      <button onclick="switchTab('insert')" id="tab-btn-insert" class="ribbon-tab text-gray-700 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">Sisipkan</button>
-      <button onclick="switchTab('design')" id="tab-btn-design" class="ribbon-tab text-gray-700 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">Desain</button>
-      <button onclick="switchTab('layout')" id="tab-btn-layout" class="ribbon-tab text-gray-700 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">Tata Letak</button>
-      <button onclick="switchTab('references')" id="tab-btn-references" class="ribbon-tab text-gray-700 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">Referensi</button>
-      <button onclick="switchTab('view')" id="tab-btn-view" class="ribbon-tab text-gray-700 px-3.5 py-1.5 rounded-t hover:bg-gray-200 transition">Tampilan</button>
+      <button onclick="switchTab('file')" id="tab-btn-file" class="ribbon-tab text-slate-600 px-3.5 py-1.5 rounded-t-lg hover:bg-slate-200/70 transition">File</button>
+      <button onclick="switchTab('home')" id="tab-btn-home" class="ribbon-tab font-bold text-word-800 bg-white border-t border-x border-slate-200 px-3.5 py-1.5 rounded-t-lg shadow-2xs transition">Beranda</button>
+      <button onclick="switchTab('insert')" id="tab-btn-insert" class="ribbon-tab text-slate-600 px-3.5 py-1.5 rounded-t-lg hover:bg-slate-200/70 transition">Sisipkan</button>
+      <button onclick="switchTab('design')" id="tab-btn-design" class="ribbon-tab text-slate-600 px-3.5 py-1.5 rounded-t-lg hover:bg-slate-200/70 transition">Desain</button>
+      <button onclick="switchTab('layout')" id="tab-btn-layout" class="ribbon-tab text-slate-600 px-3.5 py-1.5 rounded-t-lg hover:bg-slate-200/70 transition">Tata Letak</button>
+      <button onclick="switchTab('references')" id="tab-btn-references" class="ribbon-tab text-slate-600 px-3.5 py-1.5 rounded-t-lg hover:bg-slate-200/70 transition">Referensi</button>
+      <button onclick="switchTab('view')" id="tab-btn-view" class="ribbon-tab text-slate-600 px-3.5 py-1.5 rounded-t-lg hover:bg-slate-200/70 transition">Tampilan</button>
     </div>
     
     <!-- Contextual Table Tools -->
-    <div id="contextual-table-tools" class="hidden flex items-center space-x-1 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-t text-xs text-amber-950 shadow-xs">
-      <span class="font-bold mr-1 flex items-center gap-1"><i class="fa-solid fa-table text-amber-700"></i> Alat Tabel:</span>
-      <button onmousedown="event.preventDefault()" onclick="tableAddRow()" class="px-1.5 py-0.5 bg-white hover:bg-amber-50 rounded border border-amber-300 font-medium">+ Baris</button>
-      <button onmousedown="event.preventDefault()" onclick="tableAddCol()" class="px-1.5 py-0.5 bg-white hover:bg-amber-50 rounded border border-amber-300 font-medium">+ Kolom</button>
-      <button onmousedown="event.preventDefault()" onclick="tableDeleteRow()" class="px-1.5 py-0.5 bg-white hover:bg-red-50 text-red-700 rounded border border-amber-300 font-medium">- Baris</button>
-      <button onmousedown="event.preventDefault()" onclick="tableDeleteCol()" class="px-1.5 py-0.5 bg-white hover:bg-red-50 text-red-700 rounded border border-amber-300 font-medium">- Kolom</button>
-      <label class="px-1.5 py-0.5 bg-white hover:bg-amber-50 rounded border border-amber-300 cursor-pointer flex items-center gap-1" title="Warna Latar Sel Tabel">
+    <div id="contextual-table-tools" class="hidden flex items-center space-x-1 bg-amber-50 border border-amber-300 px-3 py-1 rounded-t-lg text-xs text-amber-950 shadow-xs">
+      <span class="font-bold mr-1 flex items-center gap-1.5 text-amber-800"><i class="fa-solid fa-table"></i> Alat Tabel:</span>
+      <button onmousedown="event.preventDefault()" onclick="tableAddRow()" class="px-2 py-0.5 bg-white hover:bg-amber-100 rounded border border-amber-300 font-semibold transition">+ Baris</button>
+      <button onmousedown="event.preventDefault()" onclick="tableAddCol()" class="px-2 py-0.5 bg-white hover:bg-amber-100 rounded border border-amber-300 font-semibold transition">+ Kolom</button>
+      <button onmousedown="event.preventDefault()" onclick="tableDeleteRow()" class="px-2 py-0.5 bg-white hover:bg-red-50 text-red-700 rounded border border-amber-300 font-semibold transition">- Baris</button>
+      <button onmousedown="event.preventDefault()" onclick="tableDeleteCol()" class="px-2 py-0.5 bg-white hover:bg-red-50 text-red-700 rounded border border-amber-300 font-semibold transition">- Kolom</button>
+      <label class="px-2 py-0.5 bg-white hover:bg-amber-100 rounded border border-amber-300 cursor-pointer flex items-center gap-1 font-medium" title="Warna Latar Sel Tabel">
         <span>Warna Sel</span>
         <input type="color" value="#FEF08A" onchange="tableSetCellBg(this.value)" class="w-3.5 h-3.5 border-0 p-0 bg-transparent cursor-pointer">
       </label>
-      <button onmousedown="event.preventDefault()" onclick="tableDeleteEntire()" class="px-1.5 py-0.5 bg-red-600 hover:bg-red-700 text-white rounded font-medium" title="Hapus Seluruh Tabel"><i class="fa-solid fa-trash"></i></button>
+      <button onmousedown="event.preventDefault()" onclick="tableDeleteEntire()" class="px-2 py-0.5 bg-red-600 hover:bg-red-700 text-white rounded font-semibold transition" title="Hapus Seluruh Tabel"><i class="fa-solid fa-trash"></i></button>
     </div>
   </nav>
 
   <!-- RIBBON TOOLBAR CONTAINERS -->
-  <div class="ribbon-bar bg-white border-b border-gray-300 px-4 py-2 shadow-sm text-xs select-none shrink-0">
+  <div class="ribbon-bar bg-white border-b border-slate-200 px-4 py-2.5 shadow-xs text-xs select-none shrink-0">
     
     <!-- FILE TAB CONTENT -->
     <div id="tab-content-file" class="ribbon-content hidden flex flex-wrap items-center gap-4">
@@ -762,12 +757,12 @@
 
       <div id="sidebar-pages-list" class="p-3 overflow-y-auto flex-1 space-y-2"></div>
 
-      <div id="sidebar-headings-list" class="p-3 overflow-y-auto flex-1 space-y-1.5 hidden text-xs">
+      <div id="sidebar-headings-list" class="p-3 overflow-y-auto flex-1 space-y-1.5 hidden text-xs"></div>
       <div class="p-2.5 border-t border-gray-200 bg-gray-50 space-y-1.5">
-        <button onclick="addNewPage()" class="w-full py-1.5 bg-word-700 hover:bg-word-800 text-white rounded text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm">
+        <button onclick="addNewPage()" class="w-full py-1.5 bg-word-700 hover:bg-word-800 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs transition">
           <i class="fa-solid fa-plus"></i> Tambah Halaman Baru
         </button>
-        <button onclick="deleteActivePage()" class="w-full py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+        <button onclick="deleteActivePage()" class="w-full py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition">
           <i class="fa-solid fa-trash-can"></i> Hapus Halaman Aktif
         </button>
       </div>
@@ -855,62 +850,62 @@
           <input type="file" id="custom-font-file" accept=".ttf,.otf,.woff,.woff2" class="w-full border border-gray-300 rounded p-1.5 text-xs mb-2">
           <button onclick="importLocalFontFile()" class="w-full py-2 bg-word-700 hover:bg-word-800 text-white font-semibold rounded">
             Pasang Font dari Perangkat
-          </button>
-        </div>
-        <div>
-          <label class="block font-bold text-gray-800 mb-1">2. Impor dari Google Fonts (Ketik Nama Font):</label>
-          <div class="flex gap-2">
-            <input type="text" id="google-font-name" placeholder="Contoh: Poppins, Lobster, Oswald" class="flex-1 border border-gray-300 rounded px-2.5 py-1.5">
-            <button onclick="importGoogleFont()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded">
-              Impor
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: SAVE AS (PILIH LOKASI / FORMAT SIMPAN) -->
-  <div id="modal-save-as" class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl shadow-2xl w-96 border border-gray-300 overflow-hidden">
-      <div class="bg-word-800 text-white px-4 py-3 flex justify-between items-center">
-        <h3 class="font-semibold text-sm flex items-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Simpan Dokumen Sebagai...</h3>
-        <button onclick="closeModal('modal-save-as')" class="text-blue-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+  <!-- MODAL: SHAPES (EXPANDED 12 SHAPES) -->
+  <div id="modal-shapes" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-[420px] max-w-[95vw] border border-slate-200 overflow-hidden">
+      <div class="bg-gradient-to-r from-word-900 to-word-700 text-white px-4 py-3 flex justify-between items-center">
+        <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-shapes"></i> Galeri Bentuk (Shapes)</h3>
+        <button onclick="closeModal('modal-shapes')" class="text-blue-200 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-4 space-y-3 text-xs">
-        <div>
-          <label class="block font-semibold text-gray-700 mb-1">Nama File Dokumen:</label>
-          <input type="text" id="save-as-filename" class="w-full border border-gray-300 rounded px-2.5 py-1.5 font-medium focus:border-word-600 outline-none">
+        <div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200">
+          <span class="font-semibold text-slate-700">Pilih Warna Bentuk:</span>
+          <div class="flex items-center gap-1.5">
+            <input type="color" id="shape-color-picker" value="#0F6CBD" class="w-7 h-7 rounded cursor-pointer border border-slate-300">
+            <button onclick="document.getElementById('shape-color-picker').value='#0F6CBD'" class="w-5 h-5 rounded-full bg-[#0F6CBD] border border-white shadow-xs"></button>
+            <button onclick="document.getElementById('shape-color-picker').value='#059669'" class="w-5 h-5 rounded-full bg-[#059669] border border-white shadow-xs"></button>
+            <button onclick="document.getElementById('shape-color-picker').value='#DC2626'" class="w-5 h-5 rounded-full bg-[#DC2626] border border-white shadow-xs"></button>
+            <button onclick="document.getElementById('shape-color-picker').value='#D97706'" class="w-5 h-5 rounded-full bg-[#D97706] border border-white shadow-xs"></button>
+            <button onclick="document.getElementById('shape-color-picker').value='#7C3AED'" class="w-5 h-5 rounded-full bg-[#7C3AED] border border-white shadow-xs"></button>
+          </div>
         </div>
-        <span class="block font-semibold text-gray-500 uppercase text-[10px] tracking-wider pt-1">Pilih Tujuan / Format Penyimpanan:</span>
-        <div class="space-y-2">
-          <button onclick="executeSaveChoice('word')" class="w-full p-2.5 border border-gray-200 hover:border-word-600 hover:bg-blue-50/50 rounded-lg flex items-center gap-3 text-left transition">
-            <i class="fa-solid fa-file-word text-2xl text-word-800"></i>
-            <div>
-              <div class="font-bold text-gray-800">Simpan ke Perangkat (.DOC)</div>
-              <div class="text-[11px] text-gray-500">Unduh file dokumen kompatibel Microsoft Word</div>
-            </div>
+
+        <div class="grid grid-cols-3 gap-2.5 max-h-72 overflow-y-auto pr-1">
+          <button onclick="insertShape('rect')" class="p-3 border border-slate-200 rounded-lg hover:border-word-600 hover:bg-blue-50/50 flex flex-col items-center gap-1.5 font-medium transition">
+            <div class="w-12 h-7 bg-blue-600 rounded-xs"></div> Kotak
           </button>
-          <button onclick="executeSaveChoice('pdf')" class="w-full p-2.5 border border-gray-200 hover:border-red-500 hover:bg-red-50/40 rounded-lg flex items-center gap-3 text-left transition">
-            <i class="fa-solid fa-file-pdf text-2xl text-red-600"></i>
-            <div>
-              <div class="font-bold text-gray-800">Simpan sebagai PDF / Cetak</div>
-              <div class="text-[11px] text-gray-500">Ekspor dokumen multi-halaman ke format PDF</div>
-            </div>
+          <button onclick="insertShape('round-rect')" class="p-3 border border-slate-200 rounded-lg hover:border-word-600 hover:bg-blue-50/50 flex flex-col items-center gap-1.5 font-medium transition">
+            <div class="w-12 h-7 bg-blue-600 rounded-lg"></div> Kotak Tumpul
           </button>
-          <button onclick="executeSaveChoice('html')" class="w-full p-2.5 border border-gray-200 hover:border-emerald-600 hover:bg-emerald-50/40 rounded-lg flex items-center gap-3 text-left transition">
-            <i class="fa-solid fa-code text-2xl text-emerald-600"></i>
-            <div>
-              <div class="font-bold text-gray-800">Simpan Halaman Web (.HTML)</div>
-              <div class="text-[11px] text-gray-500">Unduh dokumen dalam format HTML standar</div>
-            </div>
+          <button onclick="insertShape('circle')" class="p-3 border border-slate-200 rounded-lg hover:border-word-600 hover:bg-blue-50/50 flex flex-col items-center gap-1.5 font-medium transition">
+            <div class="w-8 h-8 bg-emerald-600 rounded-full"></div> Lingkaran
           </button>
-          <button onclick="executeSaveChoice('browser')" class="w-full p-2.5 border border-gray-200 hover:border-amber-500 hover:bg-amber-50/40 rounded-lg flex items-center gap-3 text-left transition">
-            <i class="fa-solid fa-cloud-arrow-up text-2xl text-amber-600"></i>
-            <div>
-              <div class="font-bold text-gray-800">Simpan di Memori Browser (Auto-Save)</div>
-              <div class="text-[11px] text-gray-500">Otomatis terbuka kembali saat Wordly dibuka</div>
-            </div>
+          <button onclick="insertShape('triangle')" class="p-3 border border-slate-200 rounded-lg hover:border-word-600 hover:bg-blue-50/50 flex flex-col items-center gap-1.5 font-medium transition">
+            <svg class="w-8 h-8 text-amber-500" viewBox="0 0 100 100"><polygon points="50,10 90,90 10,90" fill="currentColor"/></svg> Segitiga
+          </button>
+          <button onclick="insertShape('diamond')" class="p-3 border border-slate-200 rounded-lg hover:border-word-600 hover:bg-blue-50/50 flex flex-col items-center gap-1.5 font-medium transition">
+            <svg class="w-8 h-8 text-purple-600" viewBox="0 0 100 100"><polygon points="50,5 95,50 50,95 5,50" fill="currentColor"/></svg> Belah Ketupat
+          </button>
+          <button onclick="insertShape('pentagon')" class="p-3 border border-slate-200 rounded-lg hover:border-word-600 hover:bg-blue-50/50 flex flex-col items-center gap-1.5 font-medium transition">
+            <svg class="w-8 h-8 text-indigo-600" viewBox="0 0 100 100"><polygon points="50,5 95,38 78,92 22,92 5,38" fill="currentColor"/></svg> Segilima
+          </button>
+          <button onclick="insertShape('hexagon')" class="p-3 border border-slate-200 rounded-lg hover:border-word-600 hover:bg-blue-50/50 flex flex-col items-center gap-1.5 font-medium transition">
+            <svg class="w-8 h-8 text-teal-600" viewBox="0 0 100 100"><polygon points="50,5 93,27 93,73 50,95 7,73 7,27" fill="currentColor"/></svg> Segienam
+          </button>
+          <button onclick="insertShape('star')" class="p-3 border border-slate-200 rounded-lg hover:border-word-600 hover:bg-blue-50/50 flex flex-col items-center gap-1.5 font-medium transition">
+            <svg class="w-8 h-8 text-yellow-500" viewBox="0 0 100 100"><polygon points="50,5 63,36 96,39 71,61 79,94 50,76 21,94 29,61 4,39 37,36" fill="currentColor"/></svg> Bintang
+          </button>
+          <button onclick="insertShape('heart')" class="p-3 border border-slate-200 rounded-lg hover:border-word-600 hover:bg-blue-50/50 flex flex-col items-center gap-1.5 font-medium transition">
+            <svg class="w-8 h-8 text-rose-500" viewBox="0 0 100 100"><path d="M50 88 C20 65 5 45 5 28 A22 22 0 0 1 50 22 A22 22 0 0 1 95 28 C95 45 80 65 50 88 Z" fill="currentColor"/></svg> Hati
+          </button>
+          <button onclick="insertShape('arrow-right')" class="p-3 border border-slate-200 rounded-lg hover:border-word-600 hover:bg-blue-50/50 flex flex-col items-center gap-1.5 font-medium transition">
+            <svg class="w-8 h-8 text-sky-600" viewBox="0 0 100 100"><polygon points="5,35 60,35 60,15 95,50 60,85 60,65 5,65" fill="currentColor"/></svg> Panah Kanan
+          </button>
+          <button onclick="insertShape('callout')" class="p-3 border border-slate-200 rounded-lg hover:border-word-600 hover:bg-blue-50/50 flex flex-col items-center gap-1.5 font-medium transition">
+            <svg class="w-8 h-8 text-orange-500" viewBox="0 0 100 100"><path d="M10,15 H90 V65 H45 L25,85 V65 H10 Z" fill="currentColor"/></svg> Balon Bicara
+          </button>
+          <button onclick="insertShape('badge')" class="p-3 border border-slate-200 rounded-lg hover:border-word-600 hover:bg-blue-50/50 flex flex-col items-center gap-1.5 font-medium transition">
+            <div class="px-3 py-1 bg-amber-500 text-white rounded-full font-bold text-[10px]">LABEL</div> Lencana Pil
           </button>
         </div>
       </div>
@@ -1507,8 +1502,8 @@
     // Ribbon Tabs
     function switchTab(tabName) {
       document.querySelectorAll('.ribbon-tab').forEach(tab => {
-        tab.classList.remove('font-semibold', 'text-word-800', 'border-b-2', 'border-word-800');
-        tab.classList.add('text-gray-700');
+        tab.classList.remove('font-bold', 'text-word-800', 'bg-white', 'border-t', 'border-x', 'border-slate-200', 'shadow-2xs');
+        tab.classList.add('text-slate-600');
       });
       document.querySelectorAll('.ribbon-content').forEach(content => {
         content.classList.add('hidden');
@@ -1517,8 +1512,8 @@
       const activeBtn = document.getElementById(`tab-btn-${tabName}`);
       const activeContent = document.getElementById(`tab-content-${tabName}`);
       if (activeBtn && activeContent) {
-        activeBtn.classList.add('font-semibold', 'text-word-800', 'border-b-2', 'border-word-800');
-        activeBtn.classList.remove('text-gray-700');
+        activeBtn.classList.add('font-bold', 'text-word-800', 'bg-white', 'border-t', 'border-x', 'border-slate-200', 'shadow-2xs');
+        activeBtn.classList.remove('text-slate-600');
         activeContent.classList.remove('hidden');
       }
     }
@@ -1569,6 +1564,215 @@
       document.execCommand('styleWithCSS', false, true);
       document.execCommand(command, false, colorVal);
       saveSelection();
+      triggerAutoSave();
+    }
+
+    function changeTextCase() {
+      restoreSelection();
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+        showToast('Blok/seleksi teks terlebih dahulu untuk mengubah huruf besar/kecil.');
+        return;
+      }
+      const text = sel.toString();
+      textCaseToggle = (textCaseToggle + 1) % 3;
+      let transformed = text;
+      if (textCaseToggle === 1) transformed = text.toUpperCase();
+      else if (textCaseToggle === 2) transformed = text.toLowerCase();
+      else transformed = text.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase());
+      document.execCommand('insertText', false, transformed);
+      triggerAutoSave();
+    }
+
+    function changeLineSpacing(spacing) {
+      restoreSelection();
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        let node = sel.anchorNode;
+        while (node && node !== activeEditor && !['P', 'DIV', 'H1', 'H2', 'H3', 'LI'].includes(node.tagName)) {
+          node = node.parentNode;
+        }
+        if (node && node !== activeEditor) {
+          node.style.lineHeight = spacing;
+        } else if (activeEditor) {
+          activeEditor.querySelectorAll('p').forEach(p => p.style.lineHeight = spacing);
+        }
+      }
+      triggerAutoSave();
+      showToast(`Spasi baris diubah ke ${spacing}`);
+    }
+
+    // FORMAT PAINTER ENGINE
+    function toggleFormatPainter() {
+      const btn = document.getElementById('btn-format-painter');
+      if (formatPainterStyles) {
+        formatPainterStyles = null;
+        btn.classList.remove('bg-amber-300', 'ring-2', 'ring-amber-500');
+        showToast('Kuas Format dinonaktifkan.');
+        return;
+      }
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) {
+        showToast('Letakkan kursor pada teks contoh terlebih dahulu.');
+        return;
+      }
+      const el = sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode;
+      const computed = window.getComputedStyle(el);
+      formatPainterStyles = {
+        fontFamily: computed.fontFamily,
+        fontSize: computed.fontSize,
+        fontWeight: computed.fontWeight,
+        fontStyle: computed.fontStyle,
+        textDecoration: computed.textDecorationLine,
+        color: computed.color,
+        backgroundColor: computed.backgroundColor
+      };
+      btn.classList.add('bg-amber-300', 'ring-2', 'ring-amber-500');
+      showToast('Gaya disalin! Sekarang blok teks target untuk menerapkannya.');
+    }
+
+    function applyFormatPainterIfActive() {
+      if (!formatPainterStyles) return;
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+      const range = sel.getRangeAt(0);
+      const span = document.createElement('span');
+      Object.assign(span.style, formatPainterStyles);
+      try {
+        range.surroundContents(span);
+      } catch (e) {
+        const fragment = range.extractContents();
+        span.appendChild(fragment);
+        range.insertNode(span);
+      }
+      formatPainterStyles = null;
+      const btn = document.getElementById('btn-format-painter');
+      if (btn) btn.classList.remove('bg-amber-300', 'ring-2', 'ring-amber-500');
+      triggerAutoSave();
+      showToast('Gaya format berhasil diterapkan!');
+    }
+
+    // CUSTOM FONT IMPORTER ENGINE
+    async function importLocalFontFile() {
+      const fileInput = document.getElementById('custom-font-file');
+      const file = fileInput.files[0];
+      if (!file) {
+        showToast('Pilih file font (.ttf, .otf, .woff, .woff2) terlebih dahulu.');
+        return;
+      }
+      const fontName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9 _-]/g, '');
+      try {
+        const buffer = await file.arrayBuffer();
+        const fontFace = new FontFace(fontName, buffer);
+        await fontFace.load();
+        document.fonts.add(fontFace);
+        addFontOptionToDropdown(fontName);
+        closeModal('modal-import-font');
+        execCmd('fontName', fontName);
+        showToast(`Font "${fontName}" berhasil dipasang!`);
+      } catch (err) {
+        showToast('Gagal memuat file font. Pastikan format font valid.');
+      }
+    }
+
+    function importGoogleFont() {
+      const rawName = document.getElementById('google-font-name').value.trim();
+      if (!rawName) {
+        showToast('Masukkan nama Google Font terlebih dahulu.');
+        return;
+      }
+      const formattedQuery = rawName.replace(/\s+/g, '+');
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `https://fonts.googleapis.com/css2?family=${formattedQuery}:wght@400;600;700&display=swap`;
+      document.head.appendChild(link);
+
+      addFontOptionToDropdown(rawName);
+      document.getElementById('google-font-name').value = '';
+      closeModal('modal-import-font');
+      execCmd('fontName', rawName);
+      showToast(`Google Font "${rawName}" berhasil diimpor!`);
+    }
+
+    function addFontOptionToDropdown(fontName) {
+      const select = document.getElementById('font-family-select');
+      const exists = Array.from(select.options).some(opt => opt.value.toLowerCase() === fontName.toLowerCase());
+      if (!exists) {
+        const opt = document.createElement('option');
+        opt.value = fontName;
+        opt.textContent = `${fontName} (Kustom)`;
+        opt.style.fontFamily = fontName;
+        select.appendChild(opt);
+      }
+      select.value = fontName;
+    }
+
+    // TABLE ENGINE (FIXED & COMPLETE)
+    function confirmInsertTable() {
+      const rows = Math.max(1, Math.min(30, parseInt(document.getElementById('table-rows').value) || 3));
+      const cols = Math.max(1, Math.min(15, parseInt(document.getElementById('table-cols').value) || 3));
+      const theme = document.getElementById('table-theme-select').value;
+
+      let tableHtml = `<table class="${theme}" style="width:100%; border-collapse:collapse; margin:12px 0;"><thead><tr>`;
+      for (let c = 0; c < cols; c++) {
+        tableHtml += `<th style="border:1px solid #8A8886; padding:8px 12px; text-align:left;">Judul ${c + 1}</th>`;
+      }
+      tableHtml += `</tr></thead><tbody>`;
+      for (let r = 1; r < rows; r++) {
+        tableHtml += `<tr>`;
+        for (let c = 0; c < cols; c++) {
+          tableHtml += `<td style="border:1px solid #8A8886; padding:8px 12px;">Data ${r}.${c + 1}</td>`;
+        }
+        tableHtml += `</tr>`;
+      }
+      tableHtml += `</tbody></table><p><br></p>`;
+
+      closeModal('modal-table');
+      execCmd('insertHTML', tableHtml);
+      setTimeout(checkTableContext, 50);
+      showToast(`Tabel ${rows}x${cols} berhasil disisipkan!`);
+    }
+
+    function checkTableContext() {
+      const tools = document.getElementById('contextual-table-tools');
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) {
+        window.activeTableCell = null;
+        if (tools) tools.classList.add('hidden');
+        return;
+      }
+      let node = sel.anchorNode;
+      while (node && node !== pagesContainer) {
+        if (node.tagName === 'TD' || node.tagName === 'TH') {
+          window.activeTableCell = node;
+          if (tools) tools.classList.remove('hidden');
+          return;
+        }
+        node = node.parentNode;
+      }
+      window.activeTableCell = null;
+      if (tools) tools.classList.add('hidden');
+    }
+
+    function tableAddRow() {
+      if (!window.activeTableCell) return;
+      const tr = window.activeTableCell.parentElement;
+      const table = tr.closest('table');
+      const colCount = tr.cells.length;
+      const newRow = document.createElement('tr');
+      for (let i = 0; i < colCount; i++) {
+        const td = document.createElement('td');
+        td.style.border = '1px solid #8A8886';
+        td.style.padding = '8px 12px';
+        td.innerHTML = 'Sel Baru';
+        newRow.appendChild(td);
+      }
+      if (tr.parentElement.tagName === 'THEAD') {
+        const tbody = table.querySelector('tbody') || table;
+        tbody.insertBefore(newRow, tbody.firstChild);
+      } else {
+        tr.parentNode.insertBefore(newRow, tr.nextSibling);
+      }
       triggerAutoSave();
     }
 
@@ -1702,175 +1906,47 @@
     }
 
     function insertShape(type) {
+      const color = document.getElementById('shape-color-picker')?.value || '#0F6CBD';
       closeModal('modal-shapes');
       let shapeHtml = '';
       if (type === 'rect') {
-        shapeHtml = `<div contenteditable="true" style="width:180px; height:90px; background:#0F6CBD; color:white; display:flex; align-items:center; justify-content:center; border-radius:8px; margin:10px 0; font-weight:600;">Teks Bentuk</div>`;
+        shapeHtml = `<div contenteditable="true" style="width:180px; height:85px; background:${color}; color:white; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; margin:8px; font-weight:600; padding:8px; text-align:center;">Kotak Teks</div>`;
+      } else if (type === 'round-rect') {
+        shapeHtml = `<div contenteditable="true" style="width:180px; height:85px; background:${color}; color:white; display:inline-flex; align-items:center; justify-content:center; border-radius:16px; margin:8px; font-weight:600; padding:8px; text-align:center;">Kotak Tumpul</div>`;
       } else if (type === 'circle') {
-        shapeHtml = `<div contenteditable="true" style="width:110px; height:110px; background:#059669; color:white; display:flex; align-items:center; justify-content:center; border-radius:9999px; margin:10px 0; font-weight:600; text-align:center;">Lingkaran</div>`;
+        shapeHtml = `<div contenteditable="true" style="width:110px; height:110px; background:${color}; color:white; display:inline-flex; align-items:center; justify-content:center; border-radius:9999px; margin:8px; font-weight:600; padding:8px; text-align:center;">Lingkaran</div>`;
+      } else if (type === 'triangle') {
+        shapeHtml = `<span style="display:inline-block; margin:8px; vertical-align:middle;"><svg width="90" height="80" viewBox="0 0 100 100"><polygon points="50,8 94,92 6,92" fill="${color}"/></svg></span>`;
+      } else if (type === 'diamond') {
+        shapeHtml = `<span style="display:inline-block; margin:8px; vertical-align:middle;"><svg width="90" height="90" viewBox="0 0 100 100"><polygon points="50,5 95,50 50,95 5,50" fill="${color}"/></svg></span>`;
+      } else if (type === 'pentagon') {
+        shapeHtml = `<span style="display:inline-block; margin:8px; vertical-align:middle;"><svg width="90" height="90" viewBox="0 0 100 100"><polygon points="50,5 95,38 78,92 22,92 5,38" fill="${color}"/></svg></span>`;
+      } else if (type === 'hexagon') {
+        shapeHtml = `<span style="display:inline-block; margin:8px; vertical-align:middle;"><svg width="90" height="90" viewBox="0 0 100 100"><polygon points="50,5 93,27 93,73 50,95 7,73 7,27" fill="${color}"/></svg></span>`;
+      } else if (type === 'star') {
+        shapeHtml = `<span style="display:inline-block; margin:8px; vertical-align:middle;"><svg width="90" height="90" viewBox="0 0 100 100"><polygon points="50,5 63,36 96,39 71,61 79,94 50,76 21,94 29,61 4,39 37,36" fill="${color}"/></svg></span>`;
+      } else if (type === 'heart') {
+        shapeHtml = `<span style="display:inline-block; margin:8px; vertical-align:middle;"><svg width="90" height="90" viewBox="0 0 100 100"><path d="M50 88 C20 65 5 45 5 28 A22 22 0 0 1 50 22 A22 22 0 0 1 95 28 C95 45 80 65 50 88 Z" fill="${color}"/></svg></span>`;
+      } else if (type === 'arrow-right') {
+        shapeHtml = `<span style="display:inline-block; margin:8px; vertical-align:middle;"><svg width="110" height="70" viewBox="0 0 100 100"><polygon points="5,35 60,35 60,15 95,50 60,85 60,65 5,65" fill="${color}"/></svg></span>`;
+      } else if (type === 'callout') {
+        shapeHtml = `<div contenteditable="true" style="display:inline-block; background:${color}; color:white; padding:10px 16px; border-radius:12px; margin:8px; font-weight:600; position:relative;">💬 Ketik balon bicara...</div>`;
       } else if (type === 'badge') {
-        shapeHtml = `<span contenteditable="true" style="display:inline-block; padding:4px 14px; background:#F59E0B; color:white; border-radius:9999px; font-weight:700; font-size:12px; margin:4px;">LABEL PENTING</span>`;
-      } else if (type === 'arrow') {
-        shapeHtml = `<span style="font-size:28px; color:#185ABD; font-weight:bold;">➔</span>`;
+        shapeHtml = `<span contenteditable="true" style="display:inline-block; padding:5px 16px; background:${color}; color:white; border-radius:9999px; font-weight:700; font-size:12px; margin:4px;">LABEL PENTING</span>`;
       }
       execCmd('insertHTML', shapeHtml);
     }
 
-    // REFERENCES TAB FUNCTIONS
-    function insertAutoTOC() {
-      const headings = pagesContainer.querySelectorAll('.editor-content h1, .editor-content h2');
-      let tocHtml = `<div style="border:1px solid #CBD5E1; background:#F8FAFC; padding:16px 20px; border-radius:8px; margin:14px 0;"><h3 style="margin-top:0; color:#185ABD; border-bottom:1px solid #CBD5E1; padding-bottom:6px;">DAFTAR ISI</h3><ul style="list-style:none; padding-left:0; margin:0; space-y:4px;">`;
-      if (headings.length === 0) {
-        tocHtml += `<li style="color:#64748B; font-style:italic;">(Belum ada Judul 1 atau Judul 2 pada dokumen)</li>`;
-      } else {
-        headings.forEach((h, i) => {
-          const pad = h.tagName === 'H2' ? 'padding-left:18px;' : 'font-weight:600;';
-          tocHtml += `<li style="${pad} margin:4px 0;">${i + 1}. ${h.innerText}</li>`;
+    function triggerPaste() {
+      restoreSelection();
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        navigator.clipboard.readText().then(text => {
+          if (text) execCmd('insertText', text);
+        }).catch(() => {
+          showToast('Gunakan Ctrl+V pada keyboard untuk menempel teks.');
         });
-      }
-      tocHtml += `</ul></div><p><br></p>`;
-      execCmd('insertHTML', tocHtml);
-      showToast('Daftar Isi otomatis berhasil dibuat!');
-    }
-
-    function insertFootnote() {
-      const noteNum = document.querySelectorAll('.word-footnote-ref').length + 1;
-      execCmd('insertHTML', `<sup class="word-footnote-ref" style="color:#185ABD; font-weight:700;">[${noteNum}]</sup>`);
-      if (activeEditor) {
-        activeEditor.insertAdjacentHTML('beforeend', `<p style="font-size:11px; color:#475569; border-top:1px solid #CBD5E1; padding-top:4px; margin-top:12px;"><sup>[${noteNum}]</sup> Catatan kaki ${noteNum}: Ketik sumber referensi di sini...</p>`);
-      }
-      triggerAutoSave();
-    }
-
-    function insertCitation() {
-      execCmd('insertText', '(Santoso, 2026)');
-    }
-
-    function executeFindAndReplace() {
-      const findStr = document.getElementById('find-text-input').value;
-      const replaceStr = document.getElementById('replace-text-input').value;
-      if (!findStr) {
-        showToast('Masukkan kata yang ingin dicari terlebih dahulu.');
-        return;
-      }
-      const escaped = findStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(escaped, 'g');
-      let count = 0;
-      document.querySelectorAll('.editor-content').forEach(ed => {
-        const matches = ed.innerHTML.match(regex);
-        if (matches) count += matches.length;
-        ed.innerHTML = ed.innerHTML.replace(regex, replaceStr);
-      });
-      closeModal('modal-find-replace');
-      triggerAutoSave();
-      updateStats();
-      showToast(`Berhasil mengganti ${count} kecocokan teks.`);
-    }
-
-    // DESIGN TAB FUNCTIONS
-    function handleWatermarkSelect(val) {
-      if (val === 'CUSTOM') {
-        openModal('modal-watermark');
-        return;
-      }
-      applyWatermarkText(val);
-    }
-
-    function confirmCustomWatermark() {
-      const txt = document.getElementById('input-custom-watermark').value.trim();
-      closeModal('modal-watermark');
-      applyWatermarkText(txt);
-    }
-
-    function applyWatermarkText(text) {
-      currentWatermarkText = text;
-      document.querySelectorAll('.page-watermark').forEach(wm => {
-        wm.textContent = text;
-        if (text) wm.classList.remove('hidden');
-        else wm.classList.add('hidden');
-      });
-      triggerAutoSave();
-    }
-
-    function togglePageBorder(enabled) {
-      hasPageBorder = enabled;
-      document.querySelectorAll('.word-page').forEach(page => {
-        if (enabled) page.classList.add('page-bordered');
-        else page.classList.remove('page-bordered');
-      });
-      triggerAutoSave();
-    }
-
-    function changePageBgColor(color) {
-      document.querySelectorAll('.word-page').forEach(page => {
-        page.style.backgroundColor = color;
-      });
-      triggerAutoSave();
-    }
-
-    // LAYOUT TAB FUNCTIONS
-    function changePageLayout() {
-      const size = document.getElementById('paper-size-select').value;
-      const orientation = document.getElementById('paper-orientation-select').value;
-      const margin = document.getElementById('paper-margin-select').value;
-
-      let w = 794;
-      let h = 1123;
-      if (size === 'letter') { w = 816; h = 1056; }
-      if (size === 'legal') { w = 816; h = 1344; }
-      if (size === 'f4') { w = 812; h = 1247; }
-
-      if (orientation === 'landscape') {
-        const temp = w;
-        w = h;
-        h = temp;
-      }
-
-      let pad = '96px';
-      if (margin === 'narrow') pad = '48px';
-      if (margin === 'moderate') pad = '72px 96px';
-      if (margin === 'wide') pad = '96px 160px';
-
-      document.querySelectorAll('.word-page').forEach(page => {
-        page.style.width = `${w}px`;
-        page.style.minHeight = `${h}px`;
-        page.style.padding = pad;
-      });
-
-      rulerContainer.style.width = `${w}px`;
-      triggerAutoSave();
-    }
-
-    function changeColumns(cols) {
-      document.querySelectorAll('.editor-content').forEach(ed => {
-        ed.classList.remove('cols-2', 'cols-3');
-        if (cols === '2') ed.classList.add('cols-2');
-        if (cols === '3') ed.classList.add('cols-3');
-      });
-      triggerAutoSave();
-    }
-
-    // VIEW & ZOOM
-    function toggleRuler(show) {
-      rulerContainer.style.display = show ? 'flex' : 'none';
-    }
-
-    function setZoom(val) {
-      currentZoom = parseInt(val);
-      document.getElementById('zoom-slider').value = currentZoom;
-      document.getElementById('zoom-display').textContent = `${currentZoom}%`;
-      pagesContainer.style.transform = `scale(${currentZoom / 100})`;
-    }
-
-    function adjustZoom(delta) {
-      setZoom(Math.max(50, Math.min(160, currentZoom + delta)));
-    }
-
-    function toggleFocusMode() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
+      } else {
+        showToast('Gunakan Ctrl+V pada keyboard untuk menempel teks.');
       }
     }
 
